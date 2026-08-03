@@ -1,0 +1,58 @@
+# Binaries for programs and modules
+*.exe
+*.exe.manifest
+*.dll
+*.so
+*.dylib
+
+# Compiled object files
+*.target
+*.a
+*.o
+
+# Test binaries and coverage reports
+*.test
+*.out
+coverage.txt
+coverage.out
+c.out
+*.prof
+
+# Output binaries
+/bin/
+/main
+/api
+/server
+/backend
+
+# Architecture-specific binaries
+/backend-linux-amd64
+/backend-darwin-amd64
+/backend-windows-amd64.exe
+
+# Environment files and local configuration
+.env
+.env.*
+!.env.example
+config.local.json
+config.local.yaml
+config.local.toml
+
+# Local database and storage
+*.db
+*.sqlite
+*.sqlite3
+/data/
+
+# IDE / Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Vendor folder (uncomment if you do not want to check in vendor dependencies)
+# /vendor/

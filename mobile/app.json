@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "SurveyAgent",
+    "slug": "surveyagent-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.surveyagent"
+    }
+  }
+}
