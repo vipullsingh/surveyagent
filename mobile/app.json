@@ -4,13 +4,31 @@
     "slug": "surveyagent-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
+    "scheme": "surveyagent",
     "userInterfaceStyle": "dark",
     "newArchEnabled": false,
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.surveyagent"
     },
     "android": {
-      "package": "com.surveyagent"
-    }
+      "package": "com.surveyagent",
+      "adaptiveIcon": {
+        "backgroundColor": "#0f172a"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-asset",
+      "expo-font"
+    ]
   }
 }
