@@ -1,8 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -14,8 +17,15 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
+	// Attempt to load .env file if present
+	if err := godotenv.Load(".env"); err != nil {
+		if err := godotenv.Load("../.env"); err != nil {
+			fmt.Println("Info: No .env file found, using system environment variables and defaults")
+		}
+	}
+
 	port := getEnv("PORT", "8080")
-	dbConn := getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/surveyagent?sslmode=disable")
+	dbConn := getEnv("POSTGRES_DSN", getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/surveyagent?sslmode=disable"))
 	jwtSecret := getEnv("JWT_SECRET", "surveyagent-secret-key-super-secure-2026")
 	storagePath := getEnv("STORAGE_PATH", "./uploads")
 	env := getEnv("APP_ENV", "development")
@@ -30,7 +40,7 @@ func LoadConfig() *Config {
 }
 
 func getEnv(key, fallback string) string {
-	if value, exists := os.LookupEnv(key); exists {
+	if value, exists := os.LookupEnv(key); exists && value != "" {
 		return value
 	}
 	return fallback

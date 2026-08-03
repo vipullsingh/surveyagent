@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"surveyagent-backend/internal/db"
+	"surveyagent-backend/internal/domain"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -13,15 +14,19 @@ import (
 
 type ReportHandler struct {
 	store *db.Store
+	repo  db.Repository
 }
 
 func NewReportHandler(store *db.Store) *ReportHandler {
-	return &ReportHandler{store: store}
+	return &ReportHandler{
+		store: store,
+		repo:  db.GlobalRepo,
+	}
 }
 
 type GenerateReportRequest struct {
 	CaseID           uuid.UUID `json:"case_id" binding:"required"`
-	TemplateType     string    `json:"template_type"` // STANDARD, INSURER_SUMMARY, DETAILED
+	TemplateType     string    `json:"template_type"`
 	IncludePhotos    bool      `json:"include_photos"`
 	IncludeGeotags   bool      `json:"include_geotags"`
 	CustomRemarks    string    `json:"custom_remarks"`
@@ -35,10 +40,17 @@ func (h *ReportHandler) GenerateReportPDF(c *gin.Context) {
 		return
 	}
 
-	caseItem, exists := h.store.GetCase(req.CaseID)
-	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
-		return
+	var caseItem *domain.Case
+	if h.repo != nil {
+		caseItem, _ = h.repo.GetCaseByID(c.Request.Context(), req.CaseID.String())
+	}
+	if caseItem == nil {
+		cStore, exists := h.store.GetCase(req.CaseID)
+		if !exists {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
+			return
+		}
+		caseItem = cStore
 	}
 
 	orgID := c.MustGet("organizationID").(uuid.UUID)
@@ -48,7 +60,6 @@ func (h *ReportHandler) GenerateReportPDF(c *gin.Context) {
 		orgName = org.Name
 	}
 
-	// Generate clean HTML format for PDF conversion
 	htmlReport := fmt.Sprintf(`<!DOCTYPE html>
 <html>
 <head>
@@ -138,9 +149,9 @@ func (h *ReportHandler) GenerateReportPDF(c *gin.Context) {
 	)
 
 	c.JSON(http.StatusOK, gin.H{
-		"message":     "Report HTML/PDF layout compiled successfully",
-		"case_id":     caseItem.ID,
-		"report_html": htmlReport,
+		"message":      "Report HTML/PDF layout compiled successfully",
+		"case_id":      caseItem.ID,
+		"report_html":  htmlReport,
 		"generated_at": time.Now(),
 	})
 }

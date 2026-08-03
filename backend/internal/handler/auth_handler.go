@@ -17,10 +17,15 @@ import (
 type AuthHandler struct {
 	cfg   *config.Config
 	store *db.Store
+	repo  db.Repository
 }
 
 func NewAuthHandler(cfg *config.Config, store *db.Store) *AuthHandler {
-	return &AuthHandler{cfg: cfg, store: store}
+	return &AuthHandler{
+		cfg:   cfg,
+		store: store,
+		repo:  db.GlobalRepo,
+	}
 }
 
 type LoginRequest struct {
@@ -40,10 +45,19 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	user, found := h.store.GetUserByEmail(req.Email)
-	if !found {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
-		return
+	var user *domain.User
+	var err error
+	if h.repo != nil {
+		user, err = h.repo.GetUserByEmail(c.Request.Context(), req.Email)
+	}
+
+	if user == nil || err != nil {
+		uStore, found := h.store.GetUserByEmail(req.Email)
+		if !found {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid email or password"})
+			return
+		}
+		user = uStore
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
@@ -69,12 +83,22 @@ func (h *AuthHandler) Login(c *gin.Context) {
 }
 
 func (h *AuthHandler) Profile(c *gin.Context) {
-	userIDStr := c.MustGet("userID").(uuid.UUID)
-	h.store.GetUserByEmail("")
-	user, exists := h.store.Users[userIDStr]
-	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User profile not found"})
-		return
+	userIDStr := c.MustGet("userID").(uuid.UUID).String()
+
+	var user *domain.User
+	var err error
+	if h.repo != nil {
+		user, err = h.repo.GetUserByID(c.Request.Context(), userIDStr)
+	}
+
+	if user == nil || err != nil {
+		uid := uuid.MustParse(userIDStr)
+		uStore, exists := h.store.Users[uid]
+		if !exists {
+			c.JSON(http.StatusNotFound, gin.H{"error": "User profile not found"})
+			return
+		}
+		user = uStore
 	}
 
 	c.JSON(http.StatusOK, gin.H{"user": user})
@@ -97,7 +121,13 @@ func (h *AuthHandler) CreateUser(c *gin.Context) {
 
 	orgID := c.MustGet("organizationID").(uuid.UUID)
 
-	if _, exists := h.store.GetUserByEmail(req.Email); exists {
+	if h.repo != nil {
+		existing, _ := h.repo.GetUserByEmail(c.Request.Context(), req.Email)
+		if existing != nil {
+			c.JSON(http.StatusConflict, gin.H{"error": "User with this email already exists"})
+			return
+		}
+	} else if _, exists := h.store.GetUserByEmail(req.Email); exists {
 		c.JSON(http.StatusConflict, gin.H{"error": "User with this email already exists"})
 		return
 	}
@@ -121,6 +151,10 @@ func (h *AuthHandler) CreateUser(c *gin.Context) {
 		UpdatedAt:      time.Now(),
 	}
 
+	if h.repo != nil {
+		_ = h.repo.CreateUser(c.Request.Context(), newUser)
+	}
 	h.store.Users[newUser.ID] = newUser
+
 	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully", "user": newUser})
 }

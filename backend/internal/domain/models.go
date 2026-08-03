@@ -105,7 +105,7 @@ type Media struct {
 	Longitude   *float64  `json:"longitude,omitempty" db:"longitude"`
 	Timestamp   time.Time `json:"timestamp" db:"timestamp"`
 	Annotations string    `json:"annotations" db:"annotations"` // JSON vector drawing path
-	AITags      []string  `json:"ai_tags" db:"ai_tags"`
+	AITags      []string  `json:"ai_tags" db:"ai_tags" gorm:"serializer:json"`
 	Caption     string    `json:"caption" db:"caption"`
 	CreatedAt   time.Time `json:"created_at" db:"created_at"`
 }

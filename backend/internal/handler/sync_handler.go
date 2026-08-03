@@ -14,10 +14,14 @@ import (
 
 type SyncHandler struct {
 	store *db.Store
+	repo  db.Repository
 }
 
 func NewSyncHandler(store *db.Store) *SyncHandler {
-	return &SyncHandler{store: store}
+	return &SyncHandler{
+		store: store,
+		repo:  db.GlobalRepo,
+	}
 }
 
 func (h *SyncHandler) ProcessSync(c *gin.Context) {
@@ -36,7 +40,7 @@ func (h *SyncHandler) ProcessSync(c *gin.Context) {
 	for _, delta := range req.Deltas {
 		switch delta.EntityName {
 		case "case":
-			err := h.processCaseDelta(orgID, userID, delta)
+			err := h.processCaseDelta(c, orgID, userID, delta)
 			if err != nil {
 				failed = append(failed, domain.SyncError{
 					EntityID: delta.EntityID,
@@ -46,7 +50,7 @@ func (h *SyncHandler) ProcessSync(c *gin.Context) {
 				processedCount++
 			}
 		case "media":
-			err := h.processMediaDelta(delta)
+			err := h.processMediaDelta(c, delta)
 			if err != nil {
 				failed = append(failed, domain.SyncError{
 					EntityID: delta.EntityID,
@@ -63,9 +67,20 @@ func (h *SyncHandler) ProcessSync(c *gin.Context) {
 		}
 	}
 
-	// Fetch updates modified on server since last_synced_at
 	var serverUpdates []domain.SyncDelta
-	for _, item := range h.store.ListCases(orgID) {
+	var cases []*domain.Case
+
+	if h.repo != nil {
+		gCases, _ := h.repo.ListCases(c.Request.Context(), orgID.String(), "", "")
+		for i := range gCases {
+			cases = append(cases, &gCases[i])
+		}
+	}
+	if len(cases) == 0 {
+		cases = h.store.ListCases(orgID)
+	}
+
+	for _, item := range cases {
 		if item.UpdatedAt.After(req.LastSyncedAt) {
 			jsonBytes, _ := json.Marshal(item)
 			serverUpdates = append(serverUpdates, domain.SyncDelta{
@@ -86,28 +101,34 @@ func (h *SyncHandler) ProcessSync(c *gin.Context) {
 	})
 }
 
-func (h *SyncHandler) processCaseDelta(orgID, userID uuid.UUID, delta domain.SyncDelta) error {
-	var c domain.Case
-	if err := json.Unmarshal([]byte(delta.Data), &c); err != nil {
+func (h *SyncHandler) processCaseDelta(c *gin.Context, orgID, userID uuid.UUID, delta domain.SyncDelta) error {
+	var item domain.Case
+	if err := json.Unmarshal([]byte(delta.Data), &item); err != nil {
 		return err
 	}
 
-	c.OrganizationID = orgID
-	if c.AssignedTo == nil {
-		c.AssignedTo = &userID
+	item.OrganizationID = orgID
+	if item.AssignedTo == nil {
+		item.AssignedTo = &userID
 	}
-	c.UpdatedAt = time.Now()
+	item.UpdatedAt = time.Now()
 
-	h.store.SaveCase(&c)
+	if h.repo != nil {
+		_ = h.repo.CreateCase(c.Request.Context(), &item)
+	}
+	h.store.SaveCase(&item)
 	return nil
 }
 
-func (h *SyncHandler) processMediaDelta(delta domain.SyncDelta) error {
+func (h *SyncHandler) processMediaDelta(c *gin.Context, delta domain.SyncDelta) error {
 	var m domain.Media
 	if err := json.Unmarshal([]byte(delta.Data), &m); err != nil {
 		return err
 	}
 
+	if h.repo != nil {
+		_ = h.repo.CreateMedia(c.Request.Context(), &m)
+	}
 	h.store.Medias[m.ID] = &m
 	return nil
 }

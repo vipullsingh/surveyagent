@@ -14,10 +14,14 @@ import (
 
 type CaseHandler struct {
 	store *db.Store
+	repo  db.Repository
 }
 
 func NewCaseHandler(store *db.Store) *CaseHandler {
-	return &CaseHandler{store: store}
+	return &CaseHandler{
+		store: store,
+		repo:  db.GlobalRepo,
+	}
 }
 
 func (h *CaseHandler) ListCases(c *gin.Context) {
@@ -29,11 +33,22 @@ func (h *CaseHandler) ListCases(c *gin.Context) {
 	queryStatus := c.Query("status")
 	queryClaimType := c.Query("claim_type")
 
-	allCases := h.store.ListCases(orgID)
-	var filtered []*domain.Case
+	var allCases []*domain.Case
+	if h.repo != nil {
+		gCases, err := h.repo.ListCases(c.Request.Context(), orgID.String(), queryStatus, queryClaimType)
+		if err == nil && len(gCases) > 0 {
+			for i := range gCases {
+				allCases = append(allCases, &gCases[i])
+			}
+		}
+	}
 
+	if len(allCases) == 0 {
+		allCases = h.store.ListCases(orgID)
+	}
+
+	var filtered []*domain.Case
 	for _, item := range allCases {
-		// RBAC: Surveyors see cases assigned to them or unassigned
 		if role == domain.RoleSurveyor && item.AssignedTo != nil && *item.AssignedTo != userID {
 			continue
 		}
@@ -70,10 +85,18 @@ func (h *CaseHandler) GetCase(c *gin.Context) {
 		return
 	}
 
-	item, exists := h.store.GetCase(caseID)
-	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
-		return
+	var item *domain.Case
+	if h.repo != nil {
+		item, _ = h.repo.GetCaseByID(c.Request.Context(), idStr)
+	}
+
+	if item == nil {
+		cStore, exists := h.store.GetCase(caseID)
+		if !exists {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
+			return
+		}
+		item = cStore
 	}
 
 	orgID := c.MustGet("organizationID").(uuid.UUID)
@@ -137,7 +160,11 @@ func (h *CaseHandler) CreateCase(c *gin.Context) {
 		UpdatedAt:      time.Now(),
 	}
 
+	if h.repo != nil {
+		_ = h.repo.CreateCase(c.Request.Context(), newCase)
+	}
 	h.store.SaveCase(newCase)
+
 	c.JSON(http.StatusCreated, gin.H{"case": newCase})
 }
 
@@ -149,10 +176,17 @@ func (h *CaseHandler) UpdateCaseStatus(c *gin.Context) {
 		return
 	}
 
-	item, exists := h.store.GetCase(caseID)
-	if !exists {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
-		return
+	var item *domain.Case
+	if h.repo != nil {
+		item, _ = h.repo.GetCaseByID(c.Request.Context(), idStr)
+	}
+	if item == nil {
+		cStore, exists := h.store.GetCase(caseID)
+		if !exists {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Case not found"})
+			return
+		}
+		item = cStore
 	}
 
 	var req struct {
@@ -175,6 +209,10 @@ func (h *CaseHandler) UpdateCaseStatus(c *gin.Context) {
 	}
 	item.UpdatedAt = time.Now()
 
+	if h.repo != nil {
+		_ = h.repo.UpdateCase(c.Request.Context(), item)
+	}
 	h.store.SaveCase(item)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Status updated successfully", "case": item})
 }
