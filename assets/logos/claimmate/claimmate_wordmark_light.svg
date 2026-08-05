@@ -1,39 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="100%" height="100%">
   <defs>
-    <!-- Dark Mode Adaptations: solid color accents -->
-    <linearGradient id="accentGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A1D37"/>
-      <stop offset="100%" stop-color="#0F766E"/>
+    <!-- Solid corporate tones for crisp rendering on paper -->
+    <linearGradient id="foldLeftLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1A2D4C"/>
+      <stop offset="100%" stop-color="#0A1D37"/>
+    </linearGradient>
+    <linearGradient id="foldRightLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F766E"/>
+      <stop offset="100%" stop-color="#115E59"/>
     </linearGradient>
   </defs>
 
-  <!-- Transparent background for overlay on white PDF report sheets -->
+  <!-- Transparent background -->
   <rect width="800" height="200" fill="none"/>
 
-  <!-- Logo Icon Component (Left) -->
-  <g transform="translate(40, 20) scale(0.3125)">
-    <!-- Outer Shield Frame -->
-    <path d="M 256,100 L 380,150 C 380,270 290,360 256,400 C 222,360 132,270 132,150 Z" 
-          fill="none" stroke="url(#accentGradLight)" stroke-width="20" stroke-linejoin="round" />
+  <!-- Scaled Logo Icon Component (Left) -->
+  <g transform="translate(10, 10) scale(0.35)">
+    <!-- Folded Checkmark -->
+    <path d="M 120,240 L 220,340 L 220,300 L 140,220 Z" fill="url(#foldLeftLight)" />
+    <path d="M 220,340 L 400,160 L 360,120 L 220,260 Z" fill="url(#foldRightLight)" />
+    
+    <!-- Lines on document -->
+    <line x1="260" y1="230" x2="330" y2="160" stroke="#FFFFFF" stroke-width="6" opacity="0.4" stroke-linecap="round"/>
+    <line x1="280" y1="270" x2="350" y2="200" stroke="#FFFFFF" stroke-width="6" opacity="0.4" stroke-linecap="round"/>
 
-    <!-- Inner Precision Crosshairs -->
-    <circle cx="256" cy="220" r="60" fill="none" stroke="#0A1D37" stroke-width="4" stroke-dasharray="8 8" opacity="0.4"/>
-    <line x1="256" y1="140" x2="256" y2="300" stroke="#0A1D37" stroke-width="4" opacity="0.3"/>
-    <line x1="176" y1="220" x2="336" y2="220" stroke="#0A1D37" stroke-width="4" opacity="0.3"/>
-    <circle cx="256" cy="220" r="10" fill="#0A1D37"/>
-
-    <!-- Validation Checkmark Overlay (Solid Corporate Navy) -->
-    <path d="M 190,220 L 240,270 L 340,160" 
-          fill="none" stroke="#0F766E" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" />
+    <!-- Geotag Pin (Dark/Contrast) -->
+    <g transform="translate(180, 220)">
+      <path d="M 40,0 C 18,0 0,18 0,40 C 0,70 40,110 40,110 C 40,110 80,70 80,40 C 80,18 62,0 40,0 Z" fill="#0A1D37"/>
+      <circle cx="40" cy="40" r="22" fill="#FFFFFF"/>
+      <circle cx="40" cy="40" r="18" fill="none" stroke="#0A1D37" stroke-width="2"/>
+      <circle cx="40" cy="40" r="10" fill="#0D9488"/>
+      <circle cx="36" cy="36" r="3" fill="#FFFFFF" opacity="0.8"/>
+    </g>
   </g>
 
   <!-- Typography Wordmark Component (Right) -->
   <!-- "Claim" in Corporate Navy -->
-  <text x="230" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="80" font-weight="800" fill="#0A1D37" letter-spacing="2">CLAIM</text>
+  <text x="215" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="80" font-weight="800" fill="#0A1D37" letter-spacing="2">CLAIM</text>
   
   <!-- "Mate" in Compliance Teal -->
-  <text x="525" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="80" font-weight="300" fill="#0F766E" letter-spacing="2">MATE</text>
+  <text x="510" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="80" font-weight="300" fill="#0D9488" letter-spacing="2">MATE</text>
   
   <!-- Subtitle Tagline (Muted Slate) -->
-  <text x="235" y="165" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="600" fill="#64748B" letter-spacing="6">FIELD INSPECTION COMPANION</text>
+  <text x="220" y="165" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="600" fill="#64748B" letter-spacing="6">FIELD INSPECTION COMPANION</text>
 </svg>

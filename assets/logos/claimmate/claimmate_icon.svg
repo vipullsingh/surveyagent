@@ -5,15 +5,20 @@
       <stop offset="0%" stop-color="#1E293B"/>
       <stop offset="100%" stop-color="#0F172A"/>
     </linearGradient>
-    <!-- Accent Gradient (Steel Blue to Compliance Teal) -->
-    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- 3D Check Fold 1 (Steel Blue) -->
+    <linearGradient id="foldLeft" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#2A4365"/>
+      <stop offset="100%" stop-color="#1A2D4C"/>
+    </linearGradient>
+    <!-- 3D Check Fold 2 (Compliance Teal) -->
+    <linearGradient id="foldRight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0D9488"/>
       <stop offset="100%" stop-color="#0F766E"/>
     </linearGradient>
     <!-- Glow Filter -->
     <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
 
@@ -21,21 +26,35 @@
   <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
   <rect width="504" height="504" x="4" y="4" rx="124" fill="none" stroke="#334155" stroke-width="8"/>
 
-  <!-- Stylized Shield & Checkmark Graphic -->
-  <g transform="translate(0, 5)">
-    <!-- Outer Shield Frame -->
-    <path d="M 256,100 L 380,150 C 380,270 290,360 256,400 C 222,360 132,270 132,150 Z" 
-          fill="none" stroke="url(#accentGrad)" stroke-width="16" stroke-linejoin="round" />
+  <!-- Folded Checkmark Document Shape -->
+  <g transform="translate(4, 5)">
+    <!-- Left Short Arm of Folded Check -->
+    <path d="M 120,240 L 220,340 L 220,300 L 140,220 Z" fill="url(#foldLeft)" />
+    <path d="M 120,240 L 140,220 L 220,300 L 220,340 Z" fill="none" stroke="#334155" stroke-width="2" opacity="0.4" />
+    
+    <!-- Right Long Arm of Folded Check (Overlaps left arm at the fold corner) -->
+    <path d="M 220,340 L 400,160 L 360,120 L 220,260 Z" fill="url(#foldRight)" />
+    <path d="M 220,340 L 220,260 L 360,120 L 400,160 Z" fill="none" stroke="#0F766E" stroke-width="2" opacity="0.4" />
 
-    <!-- Inner Precision Crosshairs -->
-    <circle cx="256" cy="220" r="60" fill="none" stroke="#F8FAF4" stroke-width="4" stroke-dasharray="8 8" opacity="0.6"/>
-    <line x1="256" y1="140" x2="256" y2="300" stroke="#F8FAF4" stroke-width="4" opacity="0.4"/>
-    <line x1="176" y1="220" x2="336" y2="220" stroke="#F8FAF4" stroke-width="4" opacity="0.4"/>
-    <circle cx="256" cy="220" r="10" fill="#0F766E"/>
+    <!-- Document Line details on the folded arms to suggest a form/checklist -->
+    <line x1="260" y1="230" x2="330" y2="160" stroke="#F8FAF4" stroke-width="6" opacity="0.3" stroke-linecap="round"/>
+    <line x1="280" y1="270" x2="350" y2="200" stroke="#F8FAF4" stroke-width="6" opacity="0.3" stroke-linecap="round"/>
 
-    <!-- Validation Checkmark Overlay (Glowing) -->
-    <path d="M 190,220 L 240,270 L 340,160" 
-          fill="none" stroke="#F8FAF4" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" 
-          filter="url(#glow)"/>
+    <!-- Floating Geotag Map Pin (Adjuster site lock) -->
+    <g transform="translate(180, 220)" filter="url(#glow)">
+      <!-- Map Pin Body -->
+      <path d="M 40,0 C 18,0 0,18 0,40 C 0,70 40,110 40,110 C 40,110 80,70 80,40 C 80,18 62,0 40,0 Z" 
+            fill="#F8FAF4"/>
+      
+      <!-- Camera Aperture Outer Ring -->
+      <circle cx="40" cy="40" r="22" fill="#0A1D37"/>
+      <circle cx="40" cy="40" r="18" fill="none" stroke="#F8FAF4" stroke-width="2"/>
+      
+      <!-- Aperture blades (stylized center circle) -->
+      <circle cx="40" cy="40" r="10" fill="#0D9488"/>
+      
+      <!-- Lens flare point -->
+      <circle cx="36" cy="36" r="3" fill="#FFFFFF" opacity="0.8"/>
+    </g>
   </g>
 </svg>
