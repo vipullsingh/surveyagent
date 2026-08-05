@@ -95,19 +95,37 @@ type Case struct {
 
 // Media evidence
 type Media struct {
-	ID          uuid.UUID `json:"id" db:"id"`
-	CaseID      uuid.UUID `json:"case_id" db:"case_id"`
-	FileType    string    `json:"file_type" db:"file_type"` // PHOTO, VIDEO, SKETCH, DOCUMENT
-	StorageURL  string    `json:"storage_url" db:"storage_url"`
-	FileName    string    `json:"file_name" db:"file_name"`
-	FileSize    int64     `json:"file_size" db:"file_size"`
-	Latitude    *float64  `json:"latitude,omitempty" db:"latitude"`
-	Longitude   *float64  `json:"longitude,omitempty" db:"longitude"`
-	Timestamp   time.Time `json:"timestamp" db:"timestamp"`
-	Annotations string    `json:"annotations" db:"annotations"` // JSON vector drawing path
-	AITags      []string  `json:"ai_tags" db:"ai_tags" gorm:"serializer:json"`
-	Caption     string    `json:"caption" db:"caption"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	ID         uuid.UUID `json:"id" db:"id"`
+	CaseID     uuid.UUID `json:"case_id" db:"case_id"`
+	FileType   string    `json:"file_type" db:"file_type"` // PHOTO, VIDEO, SKETCH, DOCUMENT
+	StorageURL string    `json:"storage_url" db:"storage_url"`
+	FileName   string    `json:"file_name" db:"file_name"`
+	FileSize   int64     `json:"file_size" db:"file_size"`
+	// LocalPath is the on-device URI. Retained until the binary is uploaded to
+	// object storage so a surveyor's device can be reconciled against the server.
+	LocalPath string `json:"local_path" db:"local_path"`
+
+	Latitude    *float64 `json:"latitude,omitempty" db:"latitude"`
+	Longitude   *float64 `json:"longitude,omitempty" db:"longitude"`
+	Altitude    *float64 `json:"altitude,omitempty" db:"altitude"`
+	GPSAccuracy *float64 `json:"gps_accuracy,omitempty" db:"gps_accuracy"`
+	Heading     *float64 `json:"heading,omitempty" db:"heading"`
+
+	Timestamp time.Time `json:"timestamp" db:"timestamp"`
+
+	// Guided photo wizard slot this frame satisfies, used for completeness auditing.
+	AngleID    string `json:"angle_id" db:"angle_id"`
+	AngleLabel string `json:"angle_label" db:"angle_label"`
+
+	Annotations string   `json:"annotations" db:"annotations"` // JSON vector drawing path
+	Quality     string   `json:"quality" db:"quality"`         // JSON on-device quality report
+	AITags      []string `json:"ai_tags" db:"ai_tags" gorm:"serializer:json"`
+	Caption     string   `json:"caption" db:"caption"`
+
+	// IsDeleted carries the client's soft delete so removals propagate without
+	// destroying the server-side audit trail.
+	IsDeleted bool      `json:"is_deleted" db:"is_deleted"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 // VoiceNote evidence

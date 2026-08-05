@@ -1,4 +1,5 @@
 import { Case, Media, VoiceNote } from '../types';
+import { fileChecksum, toDataUri } from '../evidence/EvidenceStore';
 
 export interface PDFExportOptions {
   includePhotos: boolean;
@@ -6,9 +7,31 @@ export interface PDFExportOptions {
   includeChecklist: boolean;
   customRemarks?: string;
   inspectorSignature?: string;
+  /**
+   * Inlined `data:` URIs keyed by media id. The report is a self-contained document,
+   * so photographs must be embedded rather than referenced by local file path.
+   */
+  photoDataUris?: Record<string, string>;
 }
 
 class PDFExporter {
+  /**
+   * Reads the flattened evidence renditions off disk and inlines them.
+   * Run this before {@link generateReportHTML} whenever photos are included.
+   */
+  public async buildPhotoDataUris(medias: Media[]): Promise<Record<string, string>> {
+    const entries = await Promise.all(
+      medias
+        .filter(m => m.fileType === 'PHOTO' && !m.isDeleted)
+        .map(async m => [m.id, await toDataUri(m.localPath)] as const)
+    );
+
+    return entries.reduce<Record<string, string>>((acc, [id, uri]) => {
+      if (uri) acc[id] = uri;
+      return acc;
+    }, {});
+  }
+
   /**
    * Generates formatted HTML string ready for native PDF rendering or local preview
    */
@@ -19,25 +42,38 @@ class PDFExporter {
     options: PDFExportOptions
   ): string {
     const photoRows = medias
-      .filter(m => m.fileType === 'PHOTO')
-      .map(
-        (m, idx) => `
+      .filter(m => m.fileType === 'PHOTO' && !m.isDeleted)
+      .map((m, idx) => {
+        const dataUri = options.photoDataUris?.[m.id];
+        const checksum = fileChecksum(m.localPath);
+        const frame = dataUri
+          ? `<img src="${dataUri}" alt="Evidence photo ${idx + 1}" style="width: 100%; max-height: 320px; object-fit: contain; background: #0f172a; border-radius: 4px;" />`
+          : `<div style="background: #f1f5f9; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #475569; font-weight: bold;">
+               [ EVIDENTIAL PHOTO #${idx + 1} — image unavailable on this device ]
+             </div>`;
+
+        return `
         <div style="border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-bottom: 15px; page-break-inside: avoid;">
-          <div style="background: #f1f5f9; height: 180px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #475569; font-weight: bold;">
-            [ EVIDENTIAL PHOTO #${idx + 1} - ${m.caption || 'Site Damage View'} ]
+          <div style="font-size: 12px; font-weight: bold; color: #1e3a8a; margin-bottom: 6px;">
+            #${idx + 1} — ${m.angleLabel || 'Additional Evidence'}
           </div>
+          ${frame}
+          ${m.caption ? `<div style="font-size: 12px; color: #1e293b; margin-top: 6px;">${m.caption}</div>` : ''}
           <div style="margin-top: 8px; font-size: 11px; color: #64748b; display: flex; justify-content: space-between;">
             <span><strong>Timestamp:</strong> ${new Date(m.timestamp).toLocaleString()}</span>
             ${
-              options.includeGeotags && m.latitude
-                ? `<span><strong>GPS:</strong> ${m.latitude.toFixed(4)}°, ${m.longitude?.toFixed(4)}°</span>`
-                : ''
+              options.includeGeotags && m.latitude !== undefined
+                ? `<span><strong>GPS:</strong> ${m.latitude.toFixed(6)}°, ${m.longitude?.toFixed(6)}°${
+                    m.altitude !== undefined ? ` • ALT ${Math.round(m.altitude)}m` : ''
+                  }${m.gpsAccuracy !== undefined ? ` • ±${Math.round(m.gpsAccuracy)}m` : ''}</span>`
+                : '<span><strong>GPS:</strong> no fix at capture time</span>'
             }
           </div>
+          ${checksum ? `<div style="font-size: 10px; color: #94a3b8; margin-top: 3px; font-family: monospace;">MD5 ${checksum}</div>` : ''}
           ${m.aiTags?.length ? `<div style="font-size: 11px; color: #2563eb; margin-top: 4px;"><strong>AI Tags:</strong> ${m.aiTags.join(', ')}</div>` : ''}
         </div>
-      `
-      )
+      `;
+      })
       .join('');
 
     return `

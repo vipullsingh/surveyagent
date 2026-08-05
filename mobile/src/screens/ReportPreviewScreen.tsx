@@ -46,12 +46,15 @@ export const ReportPreviewScreen: React.FC<Props> = ({ route, navigation }) => {
     setVoiceNotes(v);
 
     if (c) {
+      // Photos are inlined as data URIs so the exported document stands alone.
+      const photoDataUris = await pdfExporter.buildPhotoDataUris(m);
       const html = pdfExporter.generateReportHTML(c, m, v, {
         includePhotos: true,
         includeGeotags: true,
         includeChecklist: true,
         customRemarks: remarks,
         inspectorSignature: inspectorName,
+        photoDataUris,
       });
       setGeneratedHtml(html);
     }

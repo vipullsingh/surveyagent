@@ -1,3 +1,5 @@
+import Constants from 'expo-constants';
+import { Platform } from 'react-native';
 import { realmManager } from '../database/RealmManager';
 
 export interface SyncEngineStatus {
@@ -8,12 +10,39 @@ export interface SyncEngineStatus {
   error?: string;
 }
 
+export const getBackendSyncUrl = (): string => {
+  if (process.env.EXPO_PUBLIC_API_URL) {
+    return `${process.env.EXPO_PUBLIC_API_URL}/api/v1/sync`;
+  }
+
+  // Web Browser environment
+  if (Platform.OS === 'web') {
+    return 'http://localhost:8080/api/v1/sync';
+  }
+
+  // Dynamic host IP resolution for physical device / Expo Go via Metro bundle URL
+  const hostUri = Constants.expoConfig?.hostUri || (Constants as any).manifest?.debuggerHost;
+  if (hostUri) {
+    const ip = hostUri.split(':')[0];
+    if (ip) {
+      return `http://${ip}:8080/api/v1/sync`;
+    }
+  }
+
+  // Fallback for Android Emulator vs iOS Simulator / default
+  const defaultHost = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+  return `http://${defaultHost}:8080/api/v1/sync`;
+};
+
 class SyncEngine {
   private isOnline = true;
   private isSyncing = false;
-  private backendUrl = 'http://10.0.2.2:8080/api/v1/sync';
   private authToken = '';
   private lastSyncTime?: string;
+
+  private get backendUrl(): string {
+    return getBackendSyncUrl();
+  }
 
   public setAuthToken(token: string) {
     this.authToken = token;
@@ -61,12 +90,16 @@ class SyncEngine {
         deltas,
       };
 
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      if (this.authToken) {
+        headers['Authorization'] = `Bearer ${this.authToken}`;
+      }
+
       const response = await fetch(this.backendUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.authToken}`,
-        },
+        headers,
         body: JSON.stringify(payload),
       });
 

@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   View,
   Text,
@@ -12,6 +13,7 @@ import {
 import { Case, Media, VoiceNote } from '../types';
 import { realmManager } from '../database/RealmManager';
 import { localLLMEngine, LocalAIAnalysisResult } from '../ai/LLMEngine';
+import { computeCompleteness } from '../evidence/guidedAngles';
 
 interface Props {
   route: any;
@@ -26,9 +28,12 @@ export const CaseDetailScreen: React.FC<Props> = ({ route, navigation }) => {
   const [aiAnalysis, setAiAnalysis] = useState<LocalAIAnalysisResult | undefined>();
   const [analyzingAI, setAnalyzingAI] = useState(false);
 
-  useEffect(() => {
-    loadCaseData();
-  }, [caseId]);
+  // Reloads on focus so evidence captured on the camera screen is reflected immediately.
+  useFocusEffect(
+    React.useCallback(() => {
+      loadCaseData();
+    }, [caseId])
+  );
 
   const loadCaseData = async () => {
     const item = await realmManager.getCaseById(caseId);
@@ -40,6 +45,11 @@ export const CaseDetailScreen: React.FC<Props> = ({ route, navigation }) => {
     const vList = await realmManager.getVoiceNotesForCase(caseId);
     setVoiceNotes(vList);
   };
+
+  const evidenceCoverage = useMemo(
+    () => (caseItem ? computeCompleteness(caseItem.claimType, medias) : undefined),
+    [caseItem, medias]
+  );
 
   const handleRunOfflineAI = async () => {
     if (!caseItem) return;
@@ -136,6 +146,34 @@ export const CaseDetailScreen: React.FC<Props> = ({ route, navigation }) => {
             <Text style={styles.actionCount}>Preview & Sign</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Evidence Completeness (Guided Photo Wizard coverage) */}
+        {evidenceCoverage && (
+          <TouchableOpacity
+            style={styles.evidenceCard}
+            onPress={() => navigation.navigate('CameraEvidence', { caseId: caseItem.id })}
+          >
+            <View style={styles.evidenceHeader}>
+              <Text style={styles.evidenceTitle}>📷 Evidence Completeness</Text>
+              <Text
+                style={[
+                  styles.evidencePercent,
+                  evidenceCoverage.isComplete ? styles.evidenceComplete : styles.evidenceIncomplete,
+                ]}
+              >
+                {evidenceCoverage.requiredCaptured}/{evidenceCoverage.requiredTotal}
+              </Text>
+            </View>
+            <View style={styles.evidenceTrack}>
+              <View style={[styles.evidenceFill, { width: `${evidenceCoverage.percent}%` }]} />
+            </View>
+            <Text style={styles.evidenceDetail}>
+              {evidenceCoverage.isComplete
+                ? 'All compulsory angles captured — ready for report sign-off.'
+                : `Missing: ${evidenceCoverage.missingRequired.map(a => a.label).join(', ')}`}
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {/* Local AI Analysis Section */}
         <View style={styles.aiCard}>
@@ -270,6 +308,51 @@ const styles = StyleSheet.create({
   actionCount: {
     color: '#38bdf8',
     fontSize: 12,
+  },
+  evidenceCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 14,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  evidenceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  evidenceTitle: {
+    color: '#f8fafc',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  evidencePercent: {
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  evidenceComplete: {
+    color: '#22c55e',
+  },
+  evidenceIncomplete: {
+    color: '#f59e0b',
+  },
+  evidenceTrack: {
+    height: 6,
+    backgroundColor: '#0f172a',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  evidenceFill: {
+    height: 6,
+    backgroundColor: '#22c55e',
+  },
+  evidenceDetail: {
+    color: '#94a3b8',
+    fontSize: 11,
+    lineHeight: 16,
   },
   aiCard: {
     backgroundColor: '#1e1b4b',

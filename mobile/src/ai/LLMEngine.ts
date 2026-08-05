@@ -1,4 +1,6 @@
 import { Case, Media, VoiceNote } from '../types';
+import { computeCompleteness } from '../evidence/guidedAngles';
+import { parseQualityReport } from '../evidence/PhotoQualityAnalyzer';
 
 export interface LocalAIAnalysisResult {
   summary: string;
@@ -56,9 +58,31 @@ class LocalLLMEngine {
     }
 
     const missingWarnings: string[] = [];
-    if (mediaCount < 3) {
-      missingWarnings.push(`Only ${mediaCount} photos captured. Minimum 4 compulsory angle photos recommended for ${claimType} claim.`);
+
+    // Photo evidence audit driven by the guided wizard's compulsory angle set.
+    const coverage = computeCompleteness(claimType, medias);
+    if (coverage.missingRequired.length > 0) {
+      missingWarnings.push(
+        `Missing ${coverage.missingRequired.length} compulsory ${claimType} angle(s): ${coverage.missingRequired
+          .map(a => a.label)
+          .join(', ')}.`
+      );
     }
+
+    const ungeotagged = medias.filter(m => m.fileType === 'PHOTO' && m.latitude === undefined).length;
+    if (ungeotagged > 0) {
+      missingWarnings.push(`${ungeotagged} photo(s) captured without a GPS fix and cannot be geo-verified.`);
+    }
+
+    const poorQuality = medias.filter(m => parseQualityReport(m.quality)?.verdict === 'POOR');
+    if (poorQuality.length > 0) {
+      missingWarnings.push(
+        `${poorQuality.length} photo(s) failed the on-device quality check (blur or exposure): ${poorQuality
+          .map(m => m.angleLabel ?? 'untitled')
+          .join(', ')}.`
+      );
+    }
+
     if (caseItem.latitude === undefined || caseItem.longitude === undefined) {
       missingWarnings.push('GPS location missing for this case record. Re-enable GPS location services.');
     }

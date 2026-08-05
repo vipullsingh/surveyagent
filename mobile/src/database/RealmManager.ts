@@ -1,4 +1,5 @@
 import { Case, Media, VoiceNote, SyncQueueItem } from '../types';
+import { toMediaDeletePayload, toMediaDeltaPayload } from '../services/SyncPayloads';
 
 /**
  * RealmManager provides a reactive offline-first data manager layer.
@@ -16,7 +17,7 @@ class RealmManager {
 
   private seedMockOfflineData() {
     const mockCase: Case = {
-      id: 'case-off-101',
+      id: '11111111-1111-4111-8111-111111111101',
       organizationId: '00000000-0000-0000-0000-000000000001',
       caseNumber: 'CAS-2026-MOTOR-0891',
       claimType: 'MOTOR',
@@ -45,20 +46,9 @@ class RealmManager {
 
     this.localCases.set(mockCase.id, mockCase);
 
-    const mockMedia: Media = {
-      id: 'media-01',
-      caseId: mockCase.id,
-      localPath: 'file:///data/user/0/com.surveyagent/files/photos/front_impact.jpg',
-      fileType: 'PHOTO',
-      latitude: 37.7749,
-      longitude: -122.4194,
-      timestamp: new Date().toISOString(),
-      aiTags: ['front_bumper_damage', 'radiator_leak', 'headlight_shatter'],
-      caption: 'Front bumper crush and radiator liquid spill',
-      isSynced: false,
-    };
-
-    this.localMedias.set(mockCase.id, [mockMedia]);
+    // Evidence is intentionally not seeded: the gallery renders real files from disk,
+    // so a placeholder path would surface as a broken image tile.
+    this.localMedias.set(mockCase.id, []);
   }
 
   // Cases
@@ -89,26 +79,65 @@ class RealmManager {
   }
 
   // Media
+  /** Live evidence for a case, newest last. Soft-deleted items are excluded. */
   public async getMediaForCase(caseId: string): Promise<Media[]> {
-    return this.localMedias.get(caseId) || [];
+    return (this.localMedias.get(caseId) || []).filter(m => !m.isDeleted);
+  }
+
+  public async getMediaById(caseId: string, mediaId: string): Promise<Media | undefined> {
+    return (this.localMedias.get(caseId) || []).find(m => m.id === mediaId);
   }
 
   public async saveMedia(media: Media): Promise<Media> {
     const list = this.localMedias.get(media.caseId) || [];
-    list.push(media);
+    const existingIndex = list.findIndex(m => m.id === media.id);
+    const isNew = existingIndex === -1;
+
+    const record: Media = { ...media, updatedAt: new Date().toISOString() };
+    if (isNew) {
+      list.push(record);
+    } else {
+      list[existingIndex] = record;
+    }
     this.localMedias.set(media.caseId, list);
 
     this.enqueueSync({
       id: `queue-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       entityName: 'media',
-      entityId: media.id,
-      action: 'CREATE',
-      payloadJson: JSON.stringify(media),
+      entityId: record.id,
+      action: isNew ? 'CREATE' : 'UPDATE',
+      payloadJson: JSON.stringify(toMediaDeltaPayload(record)),
       createdAt: new Date().toISOString(),
       retryCount: 0,
     });
 
-    return media;
+    return record;
+  }
+
+  /**
+   * Soft-deletes evidence so the removal still propagates to the server on the next
+   * delta flush. Callers are responsible for unlinking the underlying image files.
+   */
+  public async deleteMedia(caseId: string, mediaId: string): Promise<Media | undefined> {
+    const list = this.localMedias.get(caseId) || [];
+    const target = list.find(m => m.id === mediaId);
+    if (!target) return undefined;
+
+    target.isDeleted = true;
+    target.updatedAt = new Date().toISOString();
+    this.localMedias.set(caseId, list);
+
+    this.enqueueSync({
+      id: `queue-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      entityName: 'media',
+      entityId: mediaId,
+      action: 'DELETE',
+      payloadJson: JSON.stringify(toMediaDeletePayload(mediaId, caseId)),
+      createdAt: new Date().toISOString(),
+      retryCount: 0,
+    });
+
+    return target;
   }
 
   // Voice Notes

@@ -28,7 +28,11 @@ export const CaseListScreen: React.FC<Props> = ({ navigation }) => {
 
   useEffect(() => {
     loadCases();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadCases();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   const loadCases = async () => {
     const list = await realmManager.getCases();

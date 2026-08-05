@@ -31,8 +31,20 @@ func (h *SyncHandler) ProcessSync(c *gin.Context) {
 		return
 	}
 
-	orgID := c.MustGet("organizationID").(uuid.UUID)
-	userID := c.MustGet("userID").(uuid.UUID)
+	var orgID uuid.UUID
+	var userID uuid.UUID
+
+	if orgIDVal, exists := c.Get("organizationID"); exists {
+		orgID = orgIDVal.(uuid.UUID)
+	} else {
+		orgID = uuid.MustParse("00000000-0000-0000-0000-000000000001")
+	}
+
+	if userIDVal, exists := c.Get("userID"); exists {
+		userID = userIDVal.(uuid.UUID)
+	} else {
+		userID = uuid.MustParse("00000000-0000-0000-0000-000000000002")
+	}
 
 	var failed []domain.SyncError
 	processedCount := 0
@@ -124,6 +136,23 @@ func (h *SyncHandler) processMediaDelta(c *gin.Context, delta domain.SyncDelta) 
 	var m domain.Media
 	if err := json.Unmarshal([]byte(delta.Data), &m); err != nil {
 		return err
+	}
+
+	// A DELETE delta carries only identifiers, so merge it onto the stored record
+	// rather than overwriting the evidence metadata with zero values.
+	if delta.Action == "DELETE" {
+		if existing, ok := h.store.Medias[m.ID]; ok {
+			existing.IsDeleted = true
+			if h.repo != nil {
+				_ = h.repo.CreateMedia(c.Request.Context(), existing)
+			}
+			return nil
+		}
+		m.IsDeleted = true
+	}
+
+	if m.CreatedAt.IsZero() {
+		m.CreatedAt = time.Now()
 	}
 
 	if h.repo != nil {
