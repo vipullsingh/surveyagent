@@ -9,8 +9,8 @@ The following flowchart illustrates the surveyor navigation paths, authenticatio
 ```mermaid
 graph TD
     A([Start / Open App]) --> B{Has Valid Token?}
-    B -- Yes --> C[Case List Dashboard <br> CaseListScreen.tsx]
-    B -- No --> D[Login Screen <br> LoginScreen.tsx]
+    B -->|Yes| C[Case List Dashboard <br> CaseListScreen.tsx]
+    B -->|No| D[Login Screen <br> LoginScreen.tsx]
     
     D -->|Register Link| E[Sign Up Screen <br> SignUpScreen.tsx]
     E -->|Sign In Link| D
@@ -18,10 +18,10 @@ graph TD
     D -->|Authenticate| F{Success?}
     E -->|Register & Auto-Login| G{Success?}
     
-    F -- Yes --> C
-    F -- No -->|Show Error| D
-    G -- Yes --> C
-    G -- No -->|Show Error| E
+    F -->|Yes| C
+    F -->|No / Show Error| D
+    G -->|Yes| C
+    G -->|No / Show Error| E
     
     C -->|Tap + Button| H[Create Case Screen <br> CreateCaseScreen.tsx]
     H -->|Save Case Draft| C
