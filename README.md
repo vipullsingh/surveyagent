@@ -2,21 +2,21 @@
 ## Product Requirements Document, Development Roadmap & Continuous AI Development Framework
 
 **Product Name:** SurveyAgent  
-**Target Platform:** Mobile Field App (React Native + Realm DB) & Cloud API (Golang)  
+**Target Platform:** Mobile Field App (React Native + Local SQLite/AsyncStore Cache) & Cloud API (Golang)  
 **Target Users:** Independent Insurance Surveyors, Loss Adjusters, Field Inspectors, and Adjusting Firms (Motor, Fire, Marine, Engineering, Property)  
-**Core Promise:** 100% Offline Field Capability with On-Device AI Assistance & Instant PDF Report Generation.
+**Core Promise:** On-Demand Cloud AI Loss Adjustment, Local Evidence Preservation, and Instant Server-Rendered PDF Reports.
 
 ---
 
 ## 1. Executive Summary & Target Goals
 
-SurveyAgent is an offline-first, mobile-first field inspection application designed specifically for insurance loss adjusters. In field operations, internet connectivity is frequently unreliable or unavailable at loss sites (e.g., remote industrial sites, basements, accident zones). SurveyAgent eliminates field downtime by storing all case data, geotagged evidence, audio notes, and checklists locally using Realm DB and processing on-device AI analysis using quantized Local LLMs.
+SurveyAgent is a hybrid mobile-first field inspection application designed specifically for insurance loss adjusters. Recognizing that surveyors collect dense media evidence and detailed notes in the field, SurveyAgent stores all captured media files and checklist states locally on the device first. When ready, the surveyor triggers a single upload and analysis action, dispatching the data to the Golang backend, which orchestrates cloud AI transcription and report synthesis.
 
 ### Primary Goals & KPIs
-1. **Report Generation Speed**: Reduce time from site visit to finished, insurer-ready PDF report from hours to **under 20–30 minutes**.
-2. **Evidence Integrity**: Ensure 100% of captured evidence photos are automatically geotagged (GPS coordinates) and timestamped with real-time vector annotations.
-3. **Full Field Independence**: Guarantee that 100% of core field actions (creating cases, photo evidence capture, audio dictation, checklist completion, local AI analysis, and PDF report export) function flawlessly without internet connectivity.
-4. **Data Sync Reliability**: Provide atomic, queue-based delta synchronization when network connectivity is restored, ensuring zero data loss across multi-surveyor firms.
+1. **Report Generation Speed**: Reduce time from site visit to finished, insurer-ready PDF report from hours to **under 15–20 minutes**.
+2. **Evidence Integrity**: Ensure 100% of captured evidence photos are automatically geotagged (GPS coordinates) and timestamped with vector annotations, saved locally on the device prior to batch upload.
+3. **Robust Field Caching**: Cache assigned cases and checklist forms locally so the surveyor can work seamlessly during network drops, loading cached data in read-only mode if completely offline.
+4. **Selectable Backend AI**: Enable firm admins to configure which cloud AI models (Gemini-1.5-Flash, Gemini-1.5-Pro, GPT-4o-mini) analyze the case data and transcribe the voice dictation.
 
 ---
 
@@ -27,23 +27,23 @@ SurveyAgent is an offline-first, mobile-first field inspection application desig
                            |           SurveyAgent System             |
                            +------------------------------------------+
                                                 |
-               +--------------------------------+--------------------------------+
-               |                                                                 |
-               v                                                                 v
+                +--------------------------------+--------------------------------+
+                |                                                                 |
+                v                                                                 v
 +-----------------------------+                                   +-----------------------------+
 |    Mobile Field App (RN)    |                                   |     Golang Backend Server     |
 +-----------------------------+                                   +-----------------------------+
 | • React Native (TS)         |                                   | • Go (Gin Framework)        |
-| • Realm DB (Offline Local)  | <======== Sync Engine ========>   | • PostgreSQL Database       |
-| • Local LLM (llama.rn)      |        (HTTP Delta Queue)         | • S3/MinIO Media Storage    |
-| • Local STT (whisper.rn)    |                                   | • JWT & Multi-Tenant RBAC   |
-| • Skia Canvas Annotations   |                                   | • PDF Template Compiler     |
+| • Local Filesystem Storage  | <======== REST API Clients ======>| • PostgreSQL (GORM) DB      |
+| • SQLite / AsyncStorage Cache|        (JSON + Multipart File)    | • S3/MinIO Media Storage    |
+| • Canvas Photo Annotations  |                                   | • Cloud AI API Gateway      |
+| • Audio Dictation (.m4a)    |                                   | • PDF Report Compiler       |
 +-----------------------------+                                   +-----------------------------+
 ```
 
-- **Mobile Client**: React Native (TypeScript), `@realm/react` (Local Realm DB), `react-native-vision-camera`, `@shopify/react-native-skia`.
-- **Backend API Service**: Golang (Gin Framework), PostgreSQL / In-Memory Store, MinIO / S3 Object Storage for media assets.
-- **On-Device Offline AI**: Local quantized LLM (`LLaMA 3.2 1B` / `Phi-3-mini` via ONNX/GGUF runtime) + Local Speech-To-Text (`Whisper-Tiny/Base`).
+- **Mobile Client**: React Native (TypeScript), Expo FileSystem (Local Media files), SQLite / AsyncStorage (Local Cache), Expo Camera, `@shopify/react-native-skia` or Standard Canvas.
+- **Backend API Service**: Golang (Gin Framework), PostgreSQL (GORM), MinIO / S3 Object Storage for media assets.
+- **Cloud AI Orchestrator**: Go-based gateway integrations for Speech-To-Text (Whisper API / Gemini Multimodal) and LLM analysis (Gemini Flash/Pro, GPT-4o-mini).
 - **Authorization & Security**: Multi-tenant Organizational Role-Based Access Control (RBAC) with JWT bearer tokens.
 
 ---
@@ -57,59 +57,52 @@ SurveyAgent enforces strict firm-level multi-tenancy and role permissions:
 | Platform Analytics & Firm Management | ✅ | ❌ | ❌ | ❌ |
 | Manage Firm Users & Credentials | ❌ | ✅ | ❌ | ❌ |
 | Create & Assign Claim Cases | ❌ | ✅ | ✅ | ❌ |
-| Create & Edit Assigned Field Cases | ❌ | ✅ | ✅ | ✅ |
-| Capture Photos, Geotags & Voice Notes | ❌ | ❌ | ✅ | ✅ |
-| Execute On-Device Local LLM Analysis | ❌ | ❌ | ✅ | ✅ |
+| View Assigned Cases (Online & Cached) | ❌ | ✅ | ✅ | ✅ |
+| Save Local Photos, Checklists & Voice Notes | ❌ | ❌ | ✅ | ✅ |
+| Trigger Batch Media Upload & Cloud AI Analysis | ❌ | ❌ | ✅ | ✅ |
+| Configure Default Cloud AI Models | ❌ | ✅ | ❌ | ❌ |
 | Approve / Reject Final Claim Reports | ❌ | ✅ | ✅ | ❌ |
-| Generate & Export PDF Reports | ❌ | ✅ | ✅ | ✅ |
-| Perform Background / Manual Delta Sync | ❌ | ✅ | ✅ | ✅ |
+| Generate & Export PDF Reports (via Backend) | ❌ | ✅ | ✅ | ✅ |
 
 ---
 
 ## 4. Functional Requirements & Feature Breakdown
 
-### 4.1 Case (Claims) Management – Offline CRUD
-- **Case Creation**: Ability to create new claims offline with fields: Case Reference Number, Claim Type (`MOTOR`, `FIRE`, `MARINE`, `ENGINEERING`, `PROPERTY`, `OTHER`), Policy Number, Insured Name, Insured Contact, Location Address, GPS Coordinates, Date of Loss, Assigned Date, Priority (`LOW`, `MEDIUM`, `HIGH`, `URGENT`), and Status (`DRAFT`, `IN_PROGRESS`, `REVIEW_PENDING`, `COMPLETED`, `SUBMITTED`, `CLOSED`).
-- **List & Search**: Filter cases locally by status, claim type, priority, and date range; instant search across case numbers, policy numbers, and insured names.
-- **Status Workflow**: Enforce state transition checks from `DRAFT` → `IN_PROGRESS` → `REVIEW_PENDING` → `COMPLETED` → `SYNCED`.
-- **Soft Delete & Recovery**: Support local soft-delete with restore options prior to sync.
+### 4.1 Case (Claims) Management – Cache & CRUD
+- **Case Creation**: Created via the mobile app or backend admin console. Fields include: Case Reference Number, Claim Type (`MOTOR`, `FIRE`, `MARINE`, `ENGINEERING`, `PROPERTY`, `OTHER`), Policy Number, Insured Name, Insured Contact, Location Address, GPS Coordinates, Date of Loss, Assigned Date, Priority (`LOW`, `MEDIUM`, `HIGH`, `URGENT`), and Status (`DRAFT`, `IN_PROGRESS`, `REVIEW_PENDING`, `COMPLETED`, `SUBMITTED`, `CLOSED`).
+- **Read-Only Caching**: The mobile client caches case lists and metadata locally. If network connection is lost, surveyors can view their assigned cases and navigate active cases.
+- **Case Status Workflow**: Transition checks from `DRAFT` → `IN_PROGRESS` → `REVIEW_PENDING` → `COMPLETED` → `CLOSED`.
 
-### 4.2 Camera & Evidence Capture Engine
-- **Geotagged Multi-Shot Camera**: Automatic high-accuracy GPS geotagging (Latitude, Longitude, Altitude) and immutable timestamp embedded on every captured photo.
+### 4.2 Camera & Local Evidence Storage
+- **Geotagged Multi-Shot Camera**: High-accuracy GPS geotagging (Latitude, Longitude, Altitude) and immutable timestamp overlay embedded on every captured photo. Saved directly to the mobile device's local documents directory.
 - **Guided Photo Wizard**: Compulsory angle prompts tailored per claim type (e.g., Motor: Front Bumper, Chassis VIN, Dashboard Odometer, Underbody Leak).
-- **Interactive Annotation Tools**: Touch screen canvas overlay (arrows, callouts, text labels, damage circles, measurement lines).
-- **Photo Quality & Completeness Checker**: Instant on-device verification warning for blurry photos, low lighting, or missing compulsory angles.
+- **Interactive Annotation Tools**: Touch-screen drawing canvas overlay (arrows, callouts, text labels, damage circles). Annotations are flattened onto a local copy of the image.
+- **On-Device Quality Checker**: Instant on-device verification warning for blurry photos, low lighting, or missing compulsory angles before local saving.
 
-### 4.3 Voice Dictation & Local Speech-To-Text (STT)
-- **Continuous Field Audio Recording**: Record voice notes while inspecting physical damage.
-- **On-Device Whisper STT**: Automatic offline conversion of voice recordings into structured text transcripts attached to the case.
+### 4.3 Voice Dictation & Audio Storage
+- **Continuous Field Audio Recording**: Record voice notes describing the loss site, saved as local audio files (`.m4a` or `.mp3`) in the device's storage.
 
-### 4.4 Local LLM (On-Device Offline AI)
-- **Voice Transcript Synthesis**: Auto-extract key findings from voice transcripts.
-- **Report Auto-Drafting**: Combine checklist fields, metadata, audio transcripts, and photo tags to generate structured report sections (*Incident Overview*, *Scope of Damage*, *Surveyor Remarks*, *Estimated Repair Range*).
-- **Damage Severity Classifier**: Suggest initial damage severity rating (`MINOR`, `MODERATE`, `SEVERE`, `TOTAL_LOSS`).
-- **Missing Information Auditor**: Highlight missing compulsory fields or missing photo evidence prior to report sign-off.
+### 4.4 On-Demand Batch Upload & Cloud AI Engine
+- **Batch Upload Trigger**: A prominent "Run AI Analysis & Upload" button on the Case Detail Screen uploads all locally stored photo files, annotated photo files, and voice recordings to the backend.
+- **Cloud STT**: The backend routes the uploaded audio to Whisper API or Gemini Multimodal to generate text transcripts.
+- **LLM Report Synthesis**: The backend passes transcripts, checklist fields, and case metadata to the selected cloud LLM (Gemini-1.5-Flash, Gemini-1.5-Pro, GPT-4o-mini) to generate report drafts (*Incident Overview*, *Scope of Damage*, *Surveyor Remarks*, *Estimated Repair Range*).
+- **Missing Information Auditor**: Highlight missing checklist fields or missing compulsory photo evidence prior to report sign-off.
 
 ### 4.5 Dynamic Smart Checklists
 - **Pre-Built Domain Templates**: Templates for Motor, Fire/Property, Marine, and Engineering claims.
-- **Conditional & Required Fields**: Dynamic field display based on user selections (e.g., if "Fluid Leak" is True, mandate "Fluid Type" field).
+- **Conditional & Required Fields**: Dynamic field display based on user selections. Checklists are auto-saved to local memory/SQLite cache.
 - **Progress Tracking**: Real-time percentage indicator showing checklist completion status.
 
-### 4.6 PDF Report Generator & Exporter
-- **One-Tap PDF Export**: On-device rendering of professional PDF reports.
-- **Corporate Styling**: Header banner with firm branding/logo, policy details matrix, itemized damage assessment, geotagged photo proof grid, and inspector digital sign-off block.
-- **Local Storage & Sharing**: Save generated PDF files locally on the device; share via email or messaging when online.
-
-### 4.7 Offline Delta Sync Engine
-- **Queue-Based Change Log**: Record all offline entity mutations (`CREATE`, `UPDATE`, `DELETE`) inside a dedicated local `SyncQueue` in Realm DB.
-- **Automated Network Monitor**: Detect network state transitions via NetInfo.
-- **Atomic Sync Execution**: Upload queued deltas to `/api/v1/sync`, upload media assets to S3/MinIO, process server updates, and update local entity sync status to `SYNCED`.
+### 4.6 Server-Side PDF Report Generator
+- **HTML-to-PDF Rendering**: The backend compiles case metadata, checklists, uploaded geotagged photo grids, and surveyor signatures into a styled PDF.
+- **Mobile Export & Sharing**: The mobile client downloads the compiled PDF or triggers the native OS Share Sheet (to email, print, or send via messenger).
 
 ---
 
 ## 5. Quick Start & Execution Commands
 
 ### Running Backend Service (Golang)
+Ensure database credentials are set in your environment or `.env` configuration.
 ```bash
 cd backend
 go run cmd/api/main.go
@@ -122,7 +115,6 @@ cd mobile
 npm install
 npm start
 ```
-*Note*: For Android Emulator testing, the mobile client sync engine targets `http://10.0.2.2:8080/api/v1/sync`.
 
 ---
 
@@ -132,34 +124,27 @@ npm start
 +-----------------------------------------------------------------------------------+
 |                            SURVEYAGENT ROADMAP                                   |
 +-----------------------------------------------------------------------------------+
-  Phase 1: Foundation Setup [COMPLETED]
-  ├── Go Backend REST API Framework & In-Memory/DB Layer
-  ├── React Native Architecture & Realm DB Schema Setup
-  └── Automated Test Suites (Go unit tests & TS compilation checks)
+  Phase 1: Backend Foundation & DB Schema Setup
+  ├── Go Backend REST API Framework, JWT Auth & RBAC Setup
+  └── GORM PostgreSQL Schemas (Organizations, Users, Cases, Media, Checklist)
 
-  Phase 2: Offline Case CRUD & Dynamic Checklist Engine [COMPLETED]
-  ├── Local Realm DB persistence & case list filters
-  ├── Dynamic checklist engine for Motor, Fire, Property claims
-  └── Case status workflow transitions
+  Phase 2: Mobile Setup & Local Storage Layout
+  ├── React Native Navigation Setup & UI Screens Layout (direct API CRUD)
+  └── Local SQLite/AsyncStorage read-only cache layer & Local Filesystem Directories
 
-  Phase 3: Evidence Capture & Media File Manager [COMPLETED]
+  Phase 3: Camera Evidence & Media Saving
   ├── Geotagged camera view with GPS & timestamp overlay
   ├── Interactive photo annotation canvas
-  └── Per-case media manager gallery
+  └── Local media manager (saving image files to device filesystem)
 
-  Phase 4: Local LLM AI & Speech-to-Text Pipeline [COMPLETED]
-  ├── On-device Whisper STT voice transcription bridge
-  └── Local LLM report auto-drafting & damage severity analysis
+  Phase 4: Voice Notes & Dynamic Checklists
+  ├── Audio recorder saving voice note files locally
+  └── Dynamic checklist form engine auto-saving to local cache
 
-  Phase 5: PDF Report Generator & Delta Sync Engine [COMPLETED]
-  ├── On-device PDF rendering with corporate branding
-  ├── Background sync queue worker & Golang /api/v1/sync handler
-  └── Android 10.0.2.2 emulator bridge configuration
-
-  Phase 6: Multi-Tenant RBAC & Field Deployment Polish [IN PROGRESS]
-  ├── Admin user management endpoints & JWT token verification
-  ├── End-to-end field testing on Android Studio Emulator
-  └── Production build optimization
+  Phase 5: Batch Upload, Cloud AI & PDF Compilation
+  ├── Batch media upload client and backend /upload-media endpoints
+  ├── Cloud AI STT (Whisper/Gemini) & LLM Analysis (Gemini/OpenAI) on Backend
+  └── Backend HTML-to-PDF compiler and Mobile PDF Viewer/Share Sheet
 ```
 
 ---
@@ -167,63 +152,53 @@ npm start
 ## 7. Comprehensive Task Breakdown Checklist
 
 ### Phase 1: Core System Setup
-- [x] Initialize Golang module `surveyagent-backend` with Gin, JWT, and bcrypt.
-- [x] Create domain models (`Organization`, `User`, `Case`, `Media`, `VoiceNote`, `SyncQueue`).
-- [x] Initialize React Native client (`mobile/`) with TypeScript and Realm DB schemas.
-- [x] Implement JWT authentication and RBAC middleware (`SUPER_ADMIN`, `FIRM_ADMIN`, `SENIOR_SURVEYOR`, `SURVEYOR`).
+- [ ] Initialize Golang module `surveyagent-backend` with Gin, JWT, and bcrypt.
+- [ ] Create domain models (`Organization`, `User`, `Case`, `Media`, `VoiceNote`, `Checklist`).
+- [ ] Setup GORM database migration scripts targeting PostgreSQL.
+- [ ] Implement JWT authentication and RBAC middleware.
 
-### Phase 2: Offline Case Management
-- [x] Implement local Realm DB storage manager (`RealmManager.ts`).
-- [x] Build `CaseListScreen` with search, claim type chips, and sync status badges.
-- [x] Build `CaseDetailScreen` displaying case metadata and module shortcuts.
-- [x] Implement dynamic checklist form engine in `ChecklistFormScreen.tsx`.
+### Phase 2: Mobile UI & Caching
+- [ ] Build `LoginScreen.tsx` with organization, email, and password fields.
+- [ ] Build `CaseListScreen.tsx` with search, filters, and local caching read-back.
+- [ ] Build `CaseDetailScreen.tsx` displaying case details and module navigation tiles.
+- [ ] Build `CreateCaseScreen.tsx` capturing metadata and Auto-GPS coordinate acquisition.
 
-### Phase 3: Camera & Evidence Engine
-- [x] Build `CameraEvidenceScreen` with simulated viewfinder, GPS coordinates, and timestamps.
-- [x] Implement photo captioning, tagging, and local media gallery list.
-- [x] Implement evidence annotation canvas support.
+### Phase 3: Evidence Capture & Media
+- [ ] Build `CameraEvidenceScreen.tsx` with simulated view, GPS watermark, and quality analysis.
+- [ ] Create local directory paths for saving original/annotated photos and thumbnails.
+- [ ] Build `PhotoAnnotationScreen.tsx` with drawing canvas overlay (arrow, circle, text).
 
-### Phase 4: Local LLM & Voice Dictation
-- [x] Build `WhisperSTT.ts` for on-device voice dictation transcription.
-- [x] Build `VoiceNotesScreen.tsx` with audio log recorder and transcript display.
-- [x] Build `LLMEngine.ts` for offline report auto-drafting, severity assessment, and missing evidence warnings.
+### Phase 4: Voice Notes & Checklist Form
+- [ ] Build `VoiceNotesScreen.tsx` saving audio files to local directories.
+- [ ] Implement dynamic checklist form engine in `ChecklistFormScreen.tsx`.
 
-### Phase 5: PDF Exporter & Delta Sync Engine
-- [x] Build `PDFExporter.ts` for compiling structured HTML/PDF reports.
-- [x] Build `ReportPreviewScreen.tsx` with export options and PDF layout preview.
-- [x] Build `SyncEngine.ts` for flushing `SyncQueue` deltas to Golang `/api/v1/sync`.
-- [x] Configure Android Emulator bridge (`http://10.0.2.2:8080`).
-
-### Phase 6: Testing & Android Studio Deployment
-- [x] Run Go test suite (`go test ./...`) covering login, cases, and sync handlers.
-- [x] Run TypeScript compiler (`tsc --noEmit`) to verify 0 mobile compilation errors.
-- [x] Setup Android Gradle wrapper (`mobile/android/gradlew`) and Android Manifest permissions.
-- [x] Launch Android Emulator (`Pixel_Fold_API_35`) and Android Studio project.
+### Phase 5: Upload, AI Integration & PDF
+- [ ] Create batch upload client script in React Native.
+- [ ] Setup backend integrations for Gemini API and OpenAI APIs.
+- [ ] Build backend PDF generator rendering structured reports with embedded base64 photos.
+- [ ] Build `ReportPreviewScreen.tsx` displaying toggles, custom remarks editor, and triggers.
 
 ---
 
 ## 8. Special Prompts for Continuous AI Development
 
-To ensure seamless, error-free continuous development of SurveyAgent by AI pair-programmers and human engineers, follow these strict prompts and operational guidelines:
+To ensure seamless, error-free continuous development of SurveyAgent by AI pair-programmers and human engineers, follow these strict prompts:
 
 ### Prompt 1: New Feature Implementation Prompt
 ```markdown
-System Persona: Senior React Native & Golang Architect specializing in Offline-First Mobile Systems.
+System Persona: Senior React Native & Golang Architect specializing in API-Driven Field Systems.
 
 Task: Implement [FEATURE_NAME] for SurveyAgent.
 
 Strict Guidelines:
-1. Client-Side (React Native + Realm DB):
-   - All data modifications MUST write to the local Realm DB first.
-   - Enqueue a SyncQueue item (CREATE, UPDATE, DELETE) for every offline mutation.
-   - Ensure UI reactivity using local state and RealmListeners.
+1. Client-Side (React Native):
+   - Store captured images and voice audio files locally on the device filesystem.
+   - Cache JSON metadata (cases, checklists) locally in SQLite/AsyncStorage for read-only access.
+   - Interact with the backend via standard HTTP REST API endpoints.
 2. Server-Side (Golang Backend):
-   - Always enforce tenant isolation via claims.OrganizationID in middleware context.
-   - Enforce RBAC permission checks before modifying DB state.
-   - Return clean JSON error structures with standard HTTP status codes.
-3. Verification:
-   - Run `go test ./...` in `/backend` to verify zero regression.
-   - Run `./node_modules/.bin/tsc --noEmit` in `/mobile` to verify zero TypeScript errors.
+   - Enforce tenant isolation via organization claims in middleware context.
+   - Run AI processing (transcription, report drafting) on the server using cloud APIs.
+   - Compile PDF reports on the server and return downlodable links.
 ```
 
 ### Prompt 2: Bug Fix & Crash Resolution Prompt
@@ -234,34 +209,8 @@ Task: Debug and fix [CRASH_OR_ISSUE_DESCRIPTION].
 
 Diagnostic Checklist:
 1. If the crash occurs on Android Emulator:
-   - Check if network requests use `10.0.2.2:8080` instead of `localhost:8080`.
-   - Inspect `adb logcat -d *:E` for native exception stack traces.
-2. If the issue relates to Offline Persistence:
-   - Verify Realm schema version and primary key uniqueness (`id`).
-   - Check `SyncQueueManager` delta serialization/deserialization.
-3. Resolution:
-   - Apply minimal, clean edits without modifying unrelated comments or business logic.
-   - Re-run type checks and unit tests to validate fix.
+   - Ensure REST client hits `10.0.2.2:8080` instead of `localhost`.
+2. If the issue relates to Media:
+   - Verify local filesystem paths (`file://`) and permissions for camera/microphone.
+   - Ensure the image flattener uses local URI inputs.
 ```
-
-### Prompt 3: Code Refactoring & System Optimization Prompt
-```markdown
-System Persona: Performance Optimization Engineer for Quantized On-Device AI Models.
-
-Task: Optimize [COMPONENT_NAME] performance in SurveyAgent.
-
-Optimization Directives:
-1. Local AI Execution:
-   - Ensure LLM inference runs asynchronously on background threads without blocking React Native UI thread (60 FPS main thread goal).
-   - Use quantized GGUF/ONNX weights (Q4_K_M) to maintain RAM memory footprint under 500 MB.
-2. Media & Storage:
-   - Compress photo evidence assets before saving local URI.
-   - Include EXIF geotag metadata (Latitude, Longitude, Timestamp) embedded directly in JPEG header.
-3. Code Cleanliness:
-   - Maintain full TypeScript interface coverage in `/mobile/src/types/index.ts`.
-   - Keep Golang domain logic strictly separated into `/domain`, `/service`, and `/handler`.
-```
-
----
-
-*Document compiled and verified for SurveyAgent v1.0. All core requirements, schemas, offline guarantees, and roadmaps are codified in the repository.*
