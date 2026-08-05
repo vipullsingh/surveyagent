@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E293B"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+    <!-- Accent Gradient -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2A4365"/>
+      <stop offset="100%" stop-color="#0F766E"/>
+    </linearGradient>
+    <!-- Metal Clip Gradient -->
+    <linearGradient id="metalGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#94A3B8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+  </defs>
+
+  <!-- App Icon Base -->
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <rect width="504" height="504" x="4" y="4" rx="124" fill="none" stroke="#334155" stroke-width="8"/>
+
+  <!-- Stylized Surveyor Kit/Case -->
+  <g transform="translate(0, 15)">
+    <!-- Briefcase Handle -->
+    <path d="M 206,120 L 206,90 C 206,75 218,63 233,63 L 279,63 C 294,63 306,75 306,90 L 306,120" 
+          fill="none" stroke="url(#metalGrad)" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- Briefcase Body (Base Case Box) -->
+    <rect width="320" height="240" x="96" y="120" rx="32" fill="none" stroke="url(#accentGrad)" stroke-width="16"/>
+    
+    <!-- Dividing Line (Horizontal Center Latches) -->
+    <line x1="96" y1="240" x2="416" y2="240" stroke="#334155" stroke-width="8"/>
+
+    <!-- Left & Right Latches -->
+    <rect width="24" height="40" x="160" y="220" rx="4" fill="url(#metalGrad)"/>
+    <rect width="24" height="40" x="328" y="220" rx="4" fill="url(#metalGrad)"/>
+
+    <!-- Center Compass/Target Overlay (Precision scope element) -->
+    <circle cx="256" cy="240" r="70" fill="#1E293B" stroke="#0F766E" stroke-width="8"/>
+    <circle cx="256" cy="240" r="50" fill="none" stroke="#2A4365" stroke-width="4" stroke-dasharray="10 6"/>
+    
+    <!-- Lens Crosshair -->
+    <line x1="256" y1="180" x2="256" y2="300" stroke="#F8FAF4" stroke-width="2" opacity="0.6"/>
+    <line x1="196" y1="240" x2="316" y2="240" stroke="#F8FAF4" stroke-width="2" opacity="0.6"/>
+    <circle cx="256" cy="240" r="6" fill="#F8FAF4"/>
+
+    <!-- Corner Dial Marks -->
+    <line x1="210" y1="194" x2="218" y2="202" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+    <line x1="302" y1="194" x2="294" y2="202" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+    <line x1="210" y1="286" x2="218" y2="278" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+    <line x1="302" y1="286" x2="294" y2="278" stroke="#0F766E" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

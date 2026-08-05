@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="100%" height="100%">
+  <defs>
+    <!-- Light Mode Adaptations -->
+    <linearGradient id="accentGradLight" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A1D37"/>
+      <stop offset="100%" stop-color="#2A4365"/>
+    </linearGradient>
+    <linearGradient id="metalGradLight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#64748B"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Transparent background for overlay on white layout canvas -->
+  <rect width="800" height="200" fill="none"/>
+
+  <!-- Logo Icon Component (Left) -->
+  <g transform="translate(40, 15) scale(0.325)">
+    <!-- Briefcase Handle -->
+    <path d="M 206,120 L 206,90 C 206,75 218,63 233,63 L 279,63 C 294,63 306,75 306,90 L 306,120" 
+          fill="none" stroke="url(#metalGradLight)" stroke-width="16" stroke-linecap="round"/>
+    
+    <!-- Briefcase Body -->
+    <rect width="320" height="240" x="96" y="120" rx="32" fill="none" stroke="url(#accentGradLight)" stroke-width="16"/>
+    
+    <!-- Center Dividing Line -->
+    <line x1="96" y1="240" x2="416" y2="240" stroke="#334155" stroke-width="8"/>
+
+    <!-- Left & Right Latches -->
+    <rect width="24" height="40" x="160" y="220" rx="4" fill="url(#metalGradLight)"/>
+    <rect width="24" height="40" x="328" y="220" rx="4" fill="url(#metalGradLight)"/>
+
+    <!-- Center Dial -->
+    <circle cx="256" cy="240" r="70" fill="#FFFFFF" stroke="#2A4365" stroke-width="8"/>
+    <circle cx="256" cy="240" r="50" fill="none" stroke="#0F766E" stroke-width="4" stroke-dasharray="10 6"/>
+    <line x1="256" y1="180" x2="256" y2="300" stroke="#0A1D37" stroke-width="2" opacity="0.6"/>
+    <line x1="196" y1="240" x2="316" y2="240" stroke="#0A1D37" stroke-width="2" opacity="0.6"/>
+    <circle cx="256" cy="240" r="6" fill="#0A1D37"/>
+  </g>
+
+  <!-- Typography Wordmark Component (Right) -->
+  <!-- "Surveyor" in Corporate Navy -->
+  <text x="220" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="76" font-weight="800" fill="#0A1D37" letter-spacing="1">SURVEYOR</text>
+  
+  <!-- "Kit" in bright Steel Blue -->
+  <text x="650" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="76" font-weight="300" fill="#2A4365" letter-spacing="1">KIT</text>
+  
+  <!-- Subtitle Tagline (Muted Slate) -->
+  <text x="225" y="165" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="600" fill="#64748B" letter-spacing="6">FIELD INSPECTION TOOLKIT</text>
+</svg>
