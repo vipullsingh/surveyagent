@@ -24,12 +24,11 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ### 2.1 Login Screen (`LoginScreen.tsx`)
 
-**Purpose:** Secure, multi-tenant portal for users to authenticate into their respective adjusting firm.
+**Purpose:** Secure portal for users to authenticate into the SurveyAgent system.
 
 #### 2.1.1 Screen Components
 - **Background Container:** Dark mode slate gradient.
 - **Brand Logo:** Central SVG icon representing the SurveyAgent brand.
-- **Organization ID Field:** Text input for firm slug (used to identify multi-tenant routing).
 - **Email Field:** Text input for user authentication.
 - **Password Field:** Text input with secure text entry toggle (eye icon).
 - **Submit Button:** Glowing primary CTA.
@@ -38,14 +37,13 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 - **Authentication Action:** Tapping the Login button triggers a POST request to `/api/v1/auth/login`.
 - **Token Storage:** On HTTP 200, the app stores the returned JWT access token and user profile inside `SecureStore` (iOS Keychain / Android Keystore) and redirects to the Case List Screen.
 - **Validation Rules:**
-  - Organization ID must not be blank.
   - Email must follow standard email syntax.
   - Password must be at least 6 characters.
 - **Error Feedback:** Displays a red alert banner if authentication fails (e.g. invalid credentials or server unreachable).
 
 ---
 
-### 2.2 Case List Screen (`CaseListScreen.tsx`)
+## 2.2 Case List Screen (`CaseListScreen.tsx`)
 
 **Purpose:** Master dashboard showing all assigned inspectable cases, status chips, and offline cache flags.
 
@@ -58,7 +56,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 #### 2.2.2 Case Card Fields
 - **Case Number:** Bold white heading (e.g. `CAS-2026-MOTOR-0301`).
-- **Claim Type Chip:** Color-coded pill based on claims metadata.
+- **Claim Type Badge:** Color-coded pill based on claims metadata.
 - **Insured Name:** "Insured: John Doe".
 - **Date of Loss:** "Date: YYYY-MM-DD".
 - **Location:** Landmark or address details.
@@ -73,7 +71,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.3 Create Case Screen (`CreateCaseScreen.tsx`)
+## 2.3 Create Case Screen (`CreateCaseScreen.tsx`)
 
 **Purpose:** Metadata form to register a new inspection claim case.
 
@@ -99,7 +97,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.4 Case Detail Screen (`CaseDetailScreen.tsx`)
+## 2.4 Case Detail Screen (`CaseDetailScreen.tsx`)
 
 **Purpose:** Surveyor's inspection dashboard for case metadata, launching sub-modules, and triggering uploads/AI.
 
@@ -110,7 +108,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
   2. **Voice Dictation:** Tile showing count of local audio files.
   3. **Checklist Form:** Tile showing percentage of checklist answered.
   4. **Report Preview:** Link to generate and share the PDF.
-- **AI Analysis & Upload Card:**
+- **AI Integration Card:**
   - **AI Model Dropdown:** Selects target LLM (Gemini-1.5-Flash, Gemini-1.5-Pro, GPT-4o-mini).
   - **Upload Progress Progress-bar:** Shows progress during file batch upload.
   - **"Run AI Analysis & Upload" Button:** Main button.
@@ -128,7 +126,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.5 Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
+## 2.5 Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
 
 **Purpose:** High-resolution capture of geotagged inspectable images.
 
@@ -155,7 +153,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.6 Voice Notes Screen (`VoiceNotesScreen.tsx`)
+## 2.6 Voice Notes Screen (`VoiceNotesScreen.tsx`)
 
 **Purpose:** Local recording of verbal inspector notes for transcription later.
 
@@ -171,7 +169,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.7 Checklist Form Screen (`ChecklistFormScreen.tsx`)
+## 2.7 Checklist Form Screen (`ChecklistFormScreen.tsx`)
 
 **Purpose:** Dynamic inspection forms with conditional field rendering and progress tracking.
 
@@ -187,14 +185,14 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.8 Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
+## 2.8 Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
 
 **Purpose:** Customize layout settings, view HTML report mockup, and generate the final PDF from the server.
 
 #### 2.8.1 Layout Elements
 - **Layout Toggles:** Checkboxes to "Include Photos", "Include Geotag Details", "Include Checklist".
 - **Remarks Field:** Large text area to write final remarks.
-- **Digital Sign-off Block:** Text input field for the inspector's name.
+- **Digital Sign-off Block:** Text input field for the surveyor's name.
 - **Report Webview Preview:** Displays a styled HTML preview reflecting case contents.
 - **Export Button:** Floating action button in emerald green.
 
@@ -207,7 +205,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-### 2.9 Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
+## 2.9 Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
 
 **Purpose:** Add touch drawings (arrows, circles, text labels) directly onto evidence photos.
 
@@ -236,9 +234,9 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 - Original, annotated, and thumbnail photos are organized within isolated directories per case.
 - Audio note files must be compressed (.m4a / AAC format) to optimize storage capacity on the device.
 
-### 3.3 Security & Multi-Tenancy
-- **JWT Protection:** All backend endpoints require verification of organizational tokens.
-- **Media Exclusivity:** Handlers isolate file uploads and DB rows using organization claims.
+### 3.3 Security & Authentication
+- **JWT Protection:** All backend endpoints require verification of user tokens.
+- **Media Exclusivity:** Handlers isolate file uploads and DB rows using user claims.
 
 ---
 
@@ -270,7 +268,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 ```go
 type Case struct {
     ID             uuid.UUID `gorm:"type:uuid;primaryKey"`
-    OrganizationID uuid.UUID `gorm:"type:uuid;index"`
+    UserID         uuid.UUID `gorm:"type:uuid;index"` // Relates to the assigned surveyor
     CaseNumber     string    `gorm:"type:varchar(50);unique"`
     ClaimType      string    `gorm:"type:varchar(20)"` // MOTOR, FIRE, MARINE, PROPERTY
     PolicyNumber   string    `gorm:"type:varchar(50)"`
@@ -329,7 +327,7 @@ type Media struct {
 ## 7. Acceptance Criteria
 
 ### 7.1 Authentication & Login
-- [ ] Displays organization, email, and password fields.
+- [ ] Displays email and password fields.
 - [ ] Tapping Login routes to backend authentication endpoint.
 - [ ] Saves credentials/tokens securely on success and redirects.
 
@@ -384,4 +382,4 @@ type Media struct {
 ---
 
 ## 9. Revision History
-- **August 2026:** Revised requirements from offline-first local AI architectures to hybrid client-cache and server-driven AI models.
+- **August 2026:** Revised requirements to remove organizations and RBAC components for MVP, simplifying to user-level authentication.

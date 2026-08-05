@@ -26,11 +26,10 @@ All designs must strictly align with the **"Trust & Precision"** corporate theme
 - **Container:** Full-screen slate charcoal background (`#0F172A`) with a subtle, non-intrusive navy blue header curve gradient.
 - **Top Branding Area:** Geometric, professional company emblem placeholder resembling a compass or camera lens, next to bold title text: `SURVEYAGENT` (all-caps, modern sans-serif).
 - **Glassmorphism Form Card:** Centered card container (`#1E293B`) with a fine border (`#334155`) containing:
-  - Input field for **Organization ID** (unique tenant name).
   - Input field for **Email Address** with a subtle inline envelope icon.
   - Input field for **Password** with a togglable lock icon and eye visibility button.
   - **Login Button:** Prominent solid Corporate Navy CTA (`#0A1D37`) spanning the full width of the card.
-  - Secondary text at the bottom: "Contact IT administrator for password reset."
+  - Secondary text at the bottom: "Contact administrator for password reset."
 
 ### Comprehensive Screen Generation Prompt
 ```markdown
@@ -47,13 +46,12 @@ Generate a high-fidelity, production-grade mobile mockup of a secure Login Scree
 2. Top Branding: Renders a sleek, sharp, vector logo composed of a stylized camera lens intersecting with a compass needle in Steel Blue (#2A4365). Beside it, the brand name "SURVEYAGENT" in bold, tracking-spaced sans-serif off-white typography (#F8FAF4).
 3. Central Login Form Card:
    - Background: Dark Navy-Slate (#1E293B) with a 1px solid border (#334155) and rounded corners (16px radius).
-   - Form Fields: Three input fields stacked vertically with 16px spacing:
-     * Field 1: "Organization Tenant ID" — features an building/office icon, placeholder text "e.g. acme-adjusters", and a small label above in muted steel gray (#94A3B8).
-     * Field 2: "Email Address" — features an envelope icon, placeholder text "surveyor@firm.com".
-     * Field 3: "Password" — features a lock icon, placeholder text "••••••••", and an eye-crossed icon on the right representing password visibility toggle.
+   - Form Fields: Two input fields stacked vertically with 16px spacing:
+     * Field 1: "Email Address" — features an envelope icon, placeholder text "surveyor@firm.com".
+     * Field 2: "Password" — features a lock icon, placeholder text "••••••••", and an eye-crossed icon on the right representing password visibility toggle.
    - Field State: The "Email Address" input field is shown in the active/focused state with a crisp, solid Steel Blue (#2A4365) border and a tiny, blinking insertion cursor.
 4. Primary Action Button: A wide, solid Corporate Navy (#0A1D37) button spanning the card width. Text reads "AUTHENTICATE & LOG IN" in uppercase bold off-white, centered, with a small arrow icon on the right.
-5. Footer: A line of small, secondary text in muted gray reading: "Protected under multi-tenant secure credentials check. Contact firm administrator for login assistance."
+5. Footer: A line of small, secondary text in muted gray reading: "Protected under secure credentials check. Contact administrator for login assistance."
 
 [VISUAL STYLE & AESTHETIC PRINCIPLES]
 - Style: Corporate, stable, authoritative, and clean. Understated risk-management style.

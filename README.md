@@ -3,7 +3,7 @@
 
 **Product Name:** SurveyAgent  
 **Target Platform:** Mobile Field App (React Native + Local SQLite/AsyncStore Cache) & Cloud API (Golang)  
-**Target Users:** Independent Insurance Surveyors, Loss Adjusters, Field Inspectors, and Adjusting Firms (Motor, Fire, Marine, Engineering, Property)  
+**Target Users:** Independent Insurance Surveyors, Loss Adjusters, and Field Inspectors (Motor, Fire, Marine, Engineering, Property)  
 **Core Promise:** On-Demand Cloud AI Loss Adjustment, Local Evidence Preservation, and Instant Server-Rendered PDF Reports.
 
 ---
@@ -16,7 +16,7 @@ SurveyAgent is a hybrid mobile-first field inspection application designed speci
 1. **Report Generation Speed**: Reduce time from site visit to finished, insurer-ready PDF report from hours to **under 15–20 minutes**.
 2. **Evidence Integrity**: Ensure 100% of captured evidence photos are automatically geotagged (GPS coordinates) and timestamped with vector annotations, saved locally on the device prior to batch upload.
 3. **Robust Field Caching**: Cache assigned cases and checklist forms locally so the surveyor can work seamlessly during network drops, loading cached data in read-only mode if completely offline.
-4. **Selectable Backend AI**: Enable firm admins to configure which cloud AI models (Gemini-1.5-Flash, Gemini-1.5-Pro, GPT-4o-mini) analyze the case data and transcribe the voice dictation.
+4. **Selectable Backend AI**: Enable surveyors to configure which cloud AI models (Gemini-1.5-Flash, Gemini-1.5-Pro, GPT-4o-mini) analyze the case data and transcribe the voice dictation.
 
 ---
 
@@ -44,32 +44,25 @@ SurveyAgent is a hybrid mobile-first field inspection application designed speci
 - **Mobile Client**: React Native (TypeScript), Expo FileSystem (Local Media files), SQLite / AsyncStorage (Local Cache), Expo Camera, `@shopify/react-native-skia` or Standard Canvas.
 - **Backend API Service**: Golang (Gin Framework), PostgreSQL (GORM), MinIO / S3 Object Storage for media assets.
 - **Cloud AI Orchestrator**: Go-based gateway integrations for Speech-To-Text (Whisper API / Gemini Multimodal) and LLM analysis (Gemini Flash/Pro, GPT-4o-mini).
-- **Authorization & Security**: Multi-tenant Organizational Role-Based Access Control (RBAC) with JWT bearer tokens.
+- **Authorization & Security**: Secure token-based user authentication using JWT.
 
 ---
 
-## 3. Comprehensive Organizational RBAC Matrix
+## 3. Simplified User Access Matrix (MVP Scope)
 
-SurveyAgent enforces strict firm-level multi-tenancy and role permissions:
+Since organizations and RBAC are excluded from the MVP, access controls are simplified to user-level ownership. Surveyors manage their own cases and reports:
 
-| System Feature / Action | Super Admin | Firm Admin | Senior Surveyor / Reviewer | Field Surveyor |
-| :--- | :---: | :---: | :---: | :---: |
-| Platform Analytics & Firm Management | ✅ | ❌ | ❌ | ❌ |
-| Manage Firm Users & Credentials | ❌ | ✅ | ❌ | ❌ |
-| Create & Assign Claim Cases | ❌ | ✅ | ✅ | ❌ |
-| View Assigned Cases (Online & Cached) | ❌ | ✅ | ✅ | ✅ |
-| Save Local Photos, Checklists & Voice Notes | ❌ | ❌ | ✅ | ✅ |
-| Trigger Batch Media Upload & Cloud AI Analysis | ❌ | ❌ | ✅ | ✅ |
-| Configure Default Cloud AI Models | ❌ | ✅ | ❌ | ❌ |
-| Approve / Reject Final Claim Reports | ❌ | ✅ | ✅ | ❌ |
-| Generate & Export PDF Reports (via Backend) | ❌ | ✅ | ✅ | ✅ |
+- **Create & Manage Cases**: Surveyors can register new claims on-site or via the API.
+- **Offline Mode**: Surveyors read and update their assigned cases, checklists, and local media.
+- **Batch Upload & AI Processing**: Surveyors trigger the server-side STT transcription and LLM analysis directly from the active case details view.
+- **Generate & Share PDFs**: Surveyors finalize reports and export the PDF using native share sheets.
 
 ---
 
 ## 4. Functional Requirements & Feature Breakdown
 
 ### 4.1 Case (Claims) Management – Cache & CRUD
-- **Case Creation**: Created via the mobile app or backend admin console. Fields include: Case Reference Number, Claim Type (`MOTOR`, `FIRE`, `MARINE`, `ENGINEERING`, `PROPERTY`, `OTHER`), Policy Number, Insured Name, Insured Contact, Location Address, GPS Coordinates, Date of Loss, Assigned Date, Priority (`LOW`, `MEDIUM`, `HIGH`, `URGENT`), and Status (`DRAFT`, `IN_PROGRESS`, `REVIEW_PENDING`, `COMPLETED`, `SUBMITTED`, `CLOSED`).
+- **Case Creation**: Created via the mobile app or backend API. Fields include: Case Reference Number, Claim Type (`MOTOR`, `FIRE`, `MARINE`, `ENGINEERING`, `PROPERTY`, `OTHER`), Policy Number, Insured Name, Insured Contact, Location Address, GPS Coordinates, Date of Loss, Assigned Date, Priority (`LOW`, `MEDIUM`, `HIGH`, `URGENT`), and Status (`DRAFT`, `IN_PROGRESS`, `REVIEW_PENDING`, `COMPLETED`, `SUBMITTED`, `CLOSED`).
 - **Read-Only Caching**: The mobile client caches case lists and metadata locally. If network connection is lost, surveyors can view their assigned cases and navigate active cases.
 - **Case Status Workflow**: Transition checks from `DRAFT` → `IN_PROGRESS` → `REVIEW_PENDING` → `COMPLETED` → `CLOSED`.
 
@@ -125,8 +118,8 @@ npm start
 |                            SURVEYAGENT ROADMAP                                   |
 +-----------------------------------------------------------------------------------+
   Phase 1: Backend Foundation & DB Schema Setup
-  ├── Go Backend REST API Framework, JWT Auth & RBAC Setup
-  └── GORM PostgreSQL Schemas (Organizations, Users, Cases, Media, Checklist)
+  ├── Go Backend REST API Framework & JWT Auth Setup
+  └── GORM PostgreSQL Schemas (Users, Cases, Media, Checklist)
 
   Phase 2: Mobile Setup & Local Storage Layout
   ├── React Native Navigation Setup & UI Screens Layout (direct API CRUD)
@@ -153,12 +146,12 @@ npm start
 
 ### Phase 1: Core System Setup
 - [ ] Initialize Golang module `surveyagent-backend` with Gin, JWT, and bcrypt.
-- [ ] Create domain models (`Organization`, `User`, `Case`, `Media`, `VoiceNote`, `Checklist`).
+- [ ] Create domain models (`User`, `Case`, `Media`, `VoiceNote`, `Checklist`).
 - [ ] Setup GORM database migration scripts targeting PostgreSQL.
-- [ ] Implement JWT authentication and RBAC middleware.
+- [ ] Implement JWT authentication middleware.
 
 ### Phase 2: Mobile UI & Caching
-- [ ] Build `LoginScreen.tsx` with organization, email, and password fields.
+- [ ] Build `LoginScreen.tsx` with email and password fields.
 - [ ] Build `CaseListScreen.tsx` with search, filters, and local caching read-back.
 - [ ] Build `CaseDetailScreen.tsx` displaying case details and module navigation tiles.
 - [ ] Build `CreateCaseScreen.tsx` capturing metadata and Auto-GPS coordinate acquisition.
@@ -196,9 +189,9 @@ Strict Guidelines:
    - Cache JSON metadata (cases, checklists) locally in SQLite/AsyncStorage for read-only access.
    - Interact with the backend via standard HTTP REST API endpoints.
 2. Server-Side (Golang Backend):
-   - Enforce tenant isolation via organization claims in middleware context.
+   - Enforce user isolation via user ID claims in middleware context.
    - Run AI processing (transcription, report drafting) on the server using cloud APIs.
-   - Compile PDF reports on the server and return downlodable links.
+   - Compile PDF reports on the server and return downloadable links.
 ```
 
 ### Prompt 2: Bug Fix & Crash Resolution Prompt

@@ -23,7 +23,7 @@
 - **Requirement Specifications and Plan**:
   - Pivoted architecture away from client-side Realm DB synchronizations and native `llama.rn`/`whisper.rn` runtimes.
   - Finalized details for all 9 screens, including structured prompts for visual design generation.
-  - Outlined target GORM schemas (Organization, User, Case, Media, Checklist) and authentication matrices.
+  - Outlined target GORM schemas (User, Case, Media, Checklist) and authentication matrices.
 
 ---
 
@@ -34,7 +34,7 @@ The following technical tasks are remaining to reach 100% Production Readiness:
 ### 1. Go Backend REST API Framework & PostgreSQL GORM Schemas
 - Initialize a Go API skeleton utilizing the Gin framework.
 - Define GORM models and migrate schemas to a PostgreSQL DB.
-- Implement login JWT credentials checking and role-based permissions context.
+- Implement login JWT credentials checking.
 - Create REST endpoints for listing/creating cases.
 
 ### 2. React Native UI Screens & Local Cache
