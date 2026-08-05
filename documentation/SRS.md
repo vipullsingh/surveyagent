@@ -245,15 +245,16 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 ## 4. UI/UX Design System
 
 ### 4.1 Theme Palette
-- `background-main`: Deep slate `#0f172a`
-- `background-card`: Dark navy `#1e293b`
-- `border-card`: Slate blue `#334155`
-- `text-bright`: Off-white `#f8fafc`
-- `text-muted`: Cool gray `#94a3b8`
-- `status-success`: Emerald green `#10b981`
-- `status-warning`: Amber `#f59e0b`
-- `status-danger`: Coral red `#ef4444`
-- `accent-action`: Vibrant blue `#2563eb`
+- `background-main`: Deep Slate Charcoal `#0F172A`
+- `background-card`: Card Navy-Slate `#1E293B`
+- `border-card`: Border Muted `#334155`
+- `text-bright`: Primary Legibility Text `#F8FAF4`
+- `text-muted`: Secondary Accent Text `#94A3B8`
+- `status-success`: Compliance Teal `#0F766E`
+- `status-warning`: Warning Amber `#B45309`
+- `status-danger`: Damage Crimson `#991B1B`
+- `accent-action`: Corporate Navy `#0A1D37`
+- `accent-highlight`: Steel Blue `#2A4365`
 
 ### 4.2 Typography
 - H1 Header: 22px bold.
