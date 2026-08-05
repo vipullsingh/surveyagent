@@ -2,6 +2,51 @@
 
 This document outlines the User Stories and corresponding Acceptance Criteria for the **SurveyAgent** mobile field application, structured by features per screen. All implementations must align with the **"Trust & Precision"** corporate design language and the revised hybrid client-cache/server-driven AI architecture.
 
+## Application User Flow Diagram
+
+The following flowchart illustrates the surveyor navigation paths, authentication checks, case management, and inspection detail flows within the SurveyAgent mobile app:
+
+```mermaid
+graph TD
+    A([Start / Open App]) --> B{Has Valid Token?}
+    B -- Yes --> C[Case List Dashboard <br> CaseListScreen.tsx]
+    B -- No --> D[Login Screen <br> LoginScreen.tsx]
+    
+    D -->|Register Link| E[Sign Up Screen <br> SignUpScreen.tsx]
+    E -->|Sign In Link| D
+    
+    D -->|Authenticate| F{Success?}
+    E -->|Register & Auto-Login| G{Success?}
+    
+    F -- Yes --> C
+    F -- No -->|Show Error| D
+    G -- Yes --> C
+    G -- No -->|Show Error| E
+    
+    C -->|Tap + Button| H[Create Case Screen <br> CreateCaseScreen.tsx]
+    H -->|Save Case Draft| C
+    
+    C -->|Select Case Card| I[Case Detail Screen <br> CaseDetailScreen.tsx]
+    
+    I -->|Grid Navigation| J[Camera Screen <br> CameraEvidenceScreen.tsx]
+    J -->|Capture & Quality Check| J
+    J -->|Tap Photo| K[Annotation Screen <br> PhotoAnnotationScreen.tsx]
+    K -->|Save Canvas Drawing| J
+    
+    I -->|Grid Navigation| L[Voice Notes Screen <br> VoiceNotesScreen.tsx]
+    L -->|Record & Playback Memos| L
+    
+    I -->|Grid Navigation| M[Checklist Screen <br> ChecklistFormScreen.tsx]
+    M -->|Dynamic/Conditional Form| M
+    
+    I -->|Grid Navigation| N[Report Preview Screen <br> ReportPreviewScreen.tsx]
+    N -->|Input Sign-off & Remarks| N
+    N -->|Export PDF| O([OS Share Sheet / Print / Email])
+    
+    I -->|Run AI Analysis & Upload| P[Batch Media Upload & Cloud AI Gateway]
+    P -->|Update Cache & Report Draft| I
+```
+
 ---
 
 ## 1. Authentication & Login Screen (`LoginScreen.tsx`)
