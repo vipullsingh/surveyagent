@@ -43,18 +43,44 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-## 2.2 Case List Screen (`CaseListScreen.tsx`)
+### 2.2 Registration / Sign Up Screen (`SignUpScreen.tsx`)
+
+**Purpose:** Secure portal for new users to register and create a SurveyAgent account.
+
+#### 2.2.1 Screen Components
+- **Background Container:** Dark mode slate gradient.
+- **Brand Logo:** Central SVG icon representing the SurveyAgent brand.
+- **Full Name Field:** Text input for the surveyor's name.
+- **Email Field:** Text input for user account email.
+- **Password Field:** Secure text input with togglable visibility.
+- **Confirm Password Field:** Secure text input.
+- **Submit Button:** Glowing primary CTA labeled "CREATE ACCOUNT & REGISTER".
+- **Navigation Link:** Link reading "Already have an account? Sign In".
+
+#### 2.2.2 Interactions & Validation
+- **Registration Action:** Tapping the Sign Up button triggers a POST request to `/api/v1/auth/signup`.
+- **Auto-Login:** On HTTP 201 (Created), the app registers the session JWT access token and user profile in `SecureStore`, then navigates directly to the Case List Screen.
+- **Validation Rules:**
+  - Full Name must not be empty.
+  - Email must follow standard email syntax.
+  - Password must be at least 6 characters.
+  - Confirm Password must match the Password field.
+- **Error Feedback:** Displays a red alert banner if registration fails (e.g. email already in use or network server down).
+
+---
+
+### 2.3 Case List Screen (`CaseListScreen.tsx`)
 
 **Purpose:** Master dashboard showing all assigned inspectable cases, status chips, and offline cache flags.
 
-#### 2.2.1 Screen Components
+#### 2.3.1 Screen Components
 - **Header:** Title ("SurveyAgent Field"), Online Status Indicator (Green: Online, Yellow: Offline), App Settings cog.
 - **Search Input:** Search box with real-time client-side filter.
 - **Filters Row:** Scrollable row of claim type buttons (`ALL`, `MOTOR`, `FIRE`, `MARINE`, `PROPERTY`).
 - **Case Cards List:** FlatList containing detailed cards for each case.
 - **FAB:** Floating Action Button (+) styled with a glowing gradient.
 
-#### 2.2.2 Case Card Fields
+#### 2.3.2 Case Card Fields
 - **Case Number:** Bold white heading (e.g. `CAS-2026-MOTOR-0301`).
 - **Claim Type Badge:** Color-coded pill based on claims metadata.
 - **Insured Name:** "Insured: John Doe".
@@ -63,7 +89,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 - **Status Chip:** Status indicator (`DRAFT`, `IN_PROGRESS`, `REVIEW_PENDING`, `COMPLETED`).
 - **Cache Indicator:** Icon indicating if case checklist and metadata are cached locally.
 
-#### 2.2.3 Interactions & Cache Logic
+#### 2.3.3 Interactions & Cache Logic
 - **Offline Reading:** App checks local SQLite/AsyncStorage cache. If offline, loads the cached case list.
 - **Pull-To-Refresh:** If online, queries `/api/v1/cases` and updates the local cache.
 - **Filtering & Search:** Real-time character matching across case number, insured name, and policy number fields.
@@ -71,11 +97,11 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-## 2.3 Create Case Screen (`CreateCaseScreen.tsx`)
+### 2.4 Create Case Screen (`CreateCaseScreen.tsx`)
 
 **Purpose:** Metadata form to register a new inspection claim case.
 
-#### 2.3.1 Form Fields
+#### 2.4.1 Form Fields
 - **Claim Type Selector:** horizontal chips representing claims domains.
 - **Case Number:** Read-only auto-generated string (format: `CAS-{YEAR}-{CLAIMTYPE}-{RANDOM}`).
 - **Policy Number:** Text input.
@@ -85,23 +111,23 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 - **Site Address:** Textarea box for address input.
 - **Priority Selector:** Segmented control (`LOW`, `MEDIUM`, `HIGH`, `URGENT`).
 
-#### 2.3.2 GPS Capturing Requirements
+#### 2.4.2 GPS Capturing Requirements
 - Tapping "Auto-GPS" queries the native location API.
 - Shows a loader overlay while resolving coordinate accuracy (within 15 meters).
 - Once locked, populates the read-only Latitude and Longitude displays.
 - Saves reverse-geocoded address into the Site Address field if it was empty.
 
-#### 2.3.3 Persistence
+#### 2.4.3 Persistence
 - Saving stores the draft case to the local database cache and navigates to the Case Detail screen.
 - Synchronizes with the backend via `POST /api/v1/cases` when online.
 
 ---
 
-## 2.4 Case Detail Screen (`CaseDetailScreen.tsx`)
+### 2.5 Case Detail Screen (`CaseDetailScreen.tsx`)
 
 **Purpose:** Surveyor's inspection dashboard for case metadata, launching sub-modules, and triggering uploads/AI.
 
-#### 2.4.1 Layout Sections
+#### 2.5.1 Layout Sections
 - **Metadata Card:** Summary details block (Insured, Policy, Date, GPS, Status).
 - **Inspection Modules Grid (2x2):**
   1. **Camera & Evidence:** Tile showing count of local photos.
@@ -114,7 +140,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
   - **"Run AI Analysis & Upload" Button:** Main button.
   - **Result Area:** Markdown text field containing generated report text, estimated loss range, severity warning indicators (`MINOR`, `MODERATE`, `SEVERE`), and missing details alerts.
 
-#### 2.4.2 Batch Upload & AI Action Flow
+#### 2.5.2 Batch Upload & AI Action Flow
 1. User taps "Run AI Analysis & Upload".
 2. Application checks for internet connection. If offline, displays warning alert.
 3. If online, starts reading local documents folder:
@@ -126,11 +152,11 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-## 2.5 Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
+### 2.6 Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
 
 **Purpose:** High-resolution capture of geotagged inspectable images.
 
-#### 2.5.1 Layout & Overlay
+#### 2.6.1 Layout & Overlay
 - **Live Viewfinder:** Video feed from native camera.
 - **Watermark Layer:** Renders on screen and is flattened into the saved JPEG. Content includes:
   - Latitude, Longitude, Altitude.
@@ -139,7 +165,7 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 - **Guided Wizard Chip Bar:** Horizontal strip showing mandatory angles depending on claim type (e.g. Motor: "FRONT BUMPER", "ODOMETER", "VIN").
 - **Shutter Control:** Central capture button.
 
-#### 2.5.2 On-Device Quality Analysis
+#### 2.6.2 On-Device Quality Analysis
 - Immediately after capture, the app reads the image file buffer.
 - Performs calculations checking brightness average (under-exposed < 40/255, over-exposed > 220/255) and edge variance (blurry detection).
 - Renders a preview overlay sheet with a quality verdict:
@@ -147,33 +173,33 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
   - **FAIR (Amber):** Warning shown, allows save.
   - **POOR (Red):** Action required (blurry/dark), prompts retake but allows override save.
 
-#### 2.5.3 Local Storage Paths
+#### 2.6.3 Local Storage Paths
 - Saved original captures go to: `FileSystem.documentDirectory + 'cases/{caseId}/original/{photoId}.jpg'`.
 - Renders thumbnails to: `FileSystem.documentDirectory + 'cases/{caseId}/thumbnails/{photoId}.jpg'`.
 
 ---
 
-## 2.6 Voice Notes Screen (`VoiceNotesScreen.tsx`)
+### 2.7 Voice Notes Screen (`VoiceNotesScreen.tsx`)
 
 **Purpose:** Local recording of verbal inspector notes for transcription later.
 
-#### 2.6.1 Layout Elements
+#### 2.7.1 Layout Elements
 - **Waveform Canvas:** Visual indicator showing audio volume input levels.
 - **Record Button:** Glowing circle (blue when idle, pulsating red when recording).
 - **Saved Audio Logs List:** Scrollable list showing locally cached recordings.
 
-#### 2.6.2 Recording Workflow
+#### 2.7.2 Recording Workflow
 - Press record: starts audio recording using native microphone stream. Saves as a `.m4a` file locally in `cases/{caseId}/audio/{noteId}.m4a`.
 - Press stop: closes the audio writer stream and displays note detail in list.
 - Local playback: User can tap any saved item in the list to play back the audio locally.
 
 ---
 
-## 2.7 Checklist Form Screen (`ChecklistFormScreen.tsx`)
+### 2.8 Checklist Form Screen (`ChecklistFormScreen.tsx`)
 
 **Purpose:** Dynamic inspection forms with conditional field rendering and progress tracking.
 
-#### 2.7.1 Form Capabilities
+#### 2.8.1 Form Capabilities
 - Dynamically loads questionnaire structure depending on case `claimType`.
 - Inputs supported: Text, Textarea, Checkbox, Dropdowns, Date pickers, Numbers.
 - **Conditional Logic Rules:**
@@ -185,18 +211,18 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-## 2.8 Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
+### 2.9 Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
 
 **Purpose:** Customize layout settings, view HTML report mockup, and generate the final PDF from the server.
 
-#### 2.8.1 Layout Elements
+#### 2.9.1 Layout Elements
 - **Layout Toggles:** Checkboxes to "Include Photos", "Include Geotag Details", "Include Checklist".
 - **Remarks Field:** Large text area to write final remarks.
 - **Digital Sign-off Block:** Text input field for the surveyor's name.
 - **Report Webview Preview:** Displays a styled HTML preview reflecting case contents.
 - **Export Button:** Floating action button in emerald green.
 
-#### 2.8.2 PDF Export Workflow
+#### 2.9.2 PDF Export Workflow
 1. User taps "Export PDF Report".
 2. Client sends remarks, toggle configurations, and digital signature to the backend endpoint `POST /api/v1/cases/:id/pdf`.
 3. Backend merges data, maps checklist fields, inserts S3 photo URLs, and compiles the layout into a PDF binary.
@@ -205,16 +231,16 @@ SurveyAgent is a mobile field inspection application designed for insurance loss
 
 ---
 
-## 2.9 Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
+### 2.10 Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
 
 **Purpose:** Add touch drawings (arrows, circles, text labels) directly onto evidence photos.
 
-#### 2.9.1 Drawing Toolbar
+#### 2.10.1 Drawing Toolbar
 - **Tools:** Brush, Arrow, Circle, Rectangle, Text, Undo, Clear.
 - **Stroke Color Selection:** Red, Yellow, Cyan, Green.
 - **Canvas View:** Visual overlay scaling the image to fit the container.
 
-#### 2.9.2 Canvas Flattening
+#### 2.10.2 Canvas Flattening
 - Drawing coordinates are captured relative to image proportions (0.0 to 1.0).
 - Tapping "Save" uses a canvas compositor:
   - Merges the original image background with vector drawings.
@@ -331,43 +357,49 @@ type Media struct {
 - [ ] Tapping Login routes to backend authentication endpoint.
 - [ ] Saves credentials/tokens securely on success and redirects.
 
-### 7.2 Case List Screen
+### 7.2 Registration & Sign Up
+- [ ] Displays full name, email, password, and confirm password fields.
+- [ ] Validates that password matches confirm password.
+- [ ] Tapping register redirects to register API endpoint.
+- [ ] On successful registration, auto-logs the user in and redirects to the Case List dashboard.
+
+### 7.3 Case List Screen
 - [ ] Loads list from SQLite/AsyncStorage cache if offline.
 - [ ] Standard pull-to-refresh fetches cases and updates cache when online.
 - [ ] Tapping card navigates to Case Detail screen.
 
-### 7.3 Create Case Screen
+### 7.4 Create Case Screen
 - [ ] Auto-generates Case Number string on Claim Type change.
 - [ ] Validates all fields on save.
 - [ ] Auto-GPS locks lat/lon values within acceptable accuracy thresholds.
 
-### 7.4 Case Detail Screen
+### 7.5 Case Detail Screen
 - [ ] Lists metadata, showing modules grid with counts (photos, voice notes, progress).
 - [ ] Model selector dropdown updates the selected AI model state.
 - [ ] "Run AI Analysis & Upload" button uploads all local photos and audio notes in batch, calling the backend for transcription and analysis.
 - [ ] Displays returned AI summary, severity warnings, and checklist warnings on success.
 
-### 7.5 Camera Evidence Screen
+### 7.6 Camera Evidence Screen
 - [ ] Live camera feed showing GPS/timestamp overlay text.
 - [ ] Wizard bar updates missing required photo indicators.
 - [ ] Photo quality checker returns alert banner if blur/darkness is detected.
 - [ ] Saves images locally to device directories.
 
-### 7.6 Voice Notes Screen
+### 7.7 Voice Notes Screen
 - [ ] Recording creates `.m4a` files in local folder directory.
 - [ ] Voice notes display in local audio log list with play triggers.
 
-### 7.7 Checklist Form Screen
+### 7.8 Checklist Form Screen
 - [ ] Conditional fields hide/display based on checkbox/trigger settings.
 - [ ] Form completion updates header progress bar dynamically.
 - [ ] Edits auto-save to local memory cache on blur events.
 
-### 7.8 Report Preview & Export Screen
+### 7.9 Report Preview & Export Screen
 - [ ] Multi-layout config toggles alter preview layout settings.
 - [ ] Digital signature and remarks validate on submit.
 - [ ] Tapping Export sends compilation arguments to backend, downloading the compiled PDF binary and triggering OS Share Sheet.
 
-### 7.9 Photo Annotation Screen
+### 7.10 Photo Annotation Screen
 - [ ] Canvas overlay responds to drag gestures for arrows, circles, and shapes.
 - [ ] Save composite combines drawing vectors onto the local photo.
 
@@ -382,4 +414,4 @@ type Media struct {
 ---
 
 ## 9. Revision History
-- **August 2026:** Revised requirements to remove organizations and RBAC components for MVP, simplifying to user-level authentication.
+- **August 2026:** Revised requirements to remove organizations and RBAC components for MVP, simplifying to user-level authentication. Added SignUpScreen.

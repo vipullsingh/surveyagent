@@ -152,6 +152,7 @@ npm start
 
 ### Phase 2: Mobile UI & Caching
 - [ ] Build `LoginScreen.tsx` with email and password fields.
+- [ ] Build `SignUpScreen.tsx` with full name, email, password, and confirm password fields.
 - [ ] Build `CaseListScreen.tsx` with search, filters, and local caching read-back.
 - [ ] Build `CaseDetailScreen.tsx` displaying case details and module navigation tiles.
 - [ ] Build `CreateCaseScreen.tsx` capturing metadata and Auto-GPS coordinate acquisition.

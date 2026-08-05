@@ -1,6 +1,6 @@
 # SurveyAgent UI/UX Design & Screen Generation Prompts
 
-This document details the UI layouts, component specifications, and comprehensive design generation prompts for all **9 screens** of the SurveyAgent mobile field application. 
+This document details the UI layouts, component specifications, and comprehensive design generation prompts for all **10 screens** of the SurveyAgent mobile field application. 
 
 All designs must strictly align with the **"Trust & Precision"** corporate theme (deep corporate navy, steel blue, and dark slate charcoals) to present an authoritative, professional look tailored for insurance adjusters and field surveyors.
 
@@ -60,7 +60,51 @@ Generate a high-fidelity, production-grade mobile mockup of a secure Login Scree
 
 ---
 
-## 2. Case List Dashboard Screen (`CaseListScreen.tsx`)
+## 2. Registration / Sign Up Screen (`SignUpScreen.tsx`)
+
+### Structural Layout & Components
+- **Container:** Full-screen slate charcoal background (`#0F172A`) with a subtle, non-intrusive navy blue header curve gradient.
+- **Top Branding Area:** Geometric, professional company emblem placeholder resembling a compass or camera lens, next to bold title text: `SURVEYAGENT` (all-caps, modern sans-serif).
+- **Glassmorphism Form Card:** Centered card container (`#1E293B`) with a fine border (`#334155`) containing:
+  - Input field for **Full Name** with a subtle inline user icon.
+  - Input field for **Email Address** with a subtle inline envelope icon.
+  - Input field for **Password** with a togglable lock icon and eye visibility button.
+  - Input field for **Confirm Password** with a togglable lock icon.
+  - **Sign Up Button:** Prominent solid Corporate Navy CTA (`#0A1D37`) spanning the full width of the card.
+  - Secondary link at the bottom: "Already have an account? Sign In" (navigates back to `LoginScreen.tsx`).
+
+### Comprehensive Screen Generation Prompt
+```markdown
+[ROLE & CONTEXT]
+You are a premium Mobile UI/UX Designer specialized in creating secure corporate enterprise registration and login designs.
+
+[TASK & DEVICE SPECIFICATION]
+Generate a high-fidelity, production-grade mobile mockup of a secure User Registration / Sign Up Screen for an insurance adjusting app called "SurveyAgent".
+- Screen Frame: Match a modern bezel-less smartphone (e.g., iPhone 15 Pro / Google Pixel 8) with status bar icons visible at the top (WiFi, Battery, Time).
+- Spacing & Grid: Use a structured vertical stack with 24px side margins. Center the content vertically to focus the inspector's attention.
+
+[DETAILED COMPONENT SPECIFICATIONS]
+1. Canvas Background: Solid matte Deep Slate Charcoal (#0F172A) with a subtle, dark geometric background vector in the upper third. No bright neon elements.
+2. Top Branding: Renders a sleek, sharp, vector logo composed of a stylized camera lens intersecting with a compass needle in Steel Blue (#2A4365). Beside it, the brand name "SURVEYAGENT" in bold, tracking-spaced sans-serif off-white typography (#F8FAF4).
+3. Central Sign Up Form Card:
+   - Background: Dark Navy-Slate (#1E293B) with a 1px solid border (#334155) and rounded corners (16px radius).
+   - Form Fields: Four input fields stacked vertically with 16px spacing:
+     * Field 1: "Full Name" — features a user/profile icon, placeholder text "John Doe".
+     * Field 2: "Email Address" — features an envelope icon, placeholder text "surveyor@firm.com".
+     * Field 3: "Password" — features a lock icon, placeholder text "••••••••", and an eye-crossed icon on the right representing password visibility toggle.
+     * Field 4: "Confirm Password" — features a lock icon, placeholder text "••••••••".
+   - Field State: The "Full Name" input field is shown in the active/focused state with a crisp, solid Steel Blue (#2A4365) border and a tiny, blinking insertion cursor.
+4. Primary Action Button: A wide, solid Corporate Navy (#0A1D37) button spanning the card width. Text reads "CREATE ACCOUNT & REGISTER" in uppercase bold off-white, centered.
+5. Footer: A line of small, secondary text in muted gray reading: "Already have an account? Sign In" with "Sign In" styled in Steel Blue (#2A4365) to indicate a navigational link.
+
+[VISUAL STYLE & AESTHETIC PRINCIPLES]
+- Style: Corporate, stable, authoritative, and clean. Understated risk-management style.
+- Color Restrictions: Strictly limit the color palette to the designated hex codes. Do NOT use bright purples, magenta, glowing space gradients, or futuristic cyber-punk elements.
+```
+
+---
+
+## 3. Case List Dashboard Screen (`CaseListScreen.tsx`)
 
 ### Structural Layout & Components
 - **Top Sticky Header:** Corporate Navy background (`#0A1D37`) containing:
@@ -112,7 +156,7 @@ Create a high-fidelity mobile dashboard UI representing the "Case List" screen o
 
 ---
 
-## 3. Create Case Screen (`CreateCaseScreen.tsx`)
+## 4. Create Case Screen (`CreateCaseScreen.tsx`)
 
 ### Structural Layout & Components
 - **Header Navigation Bar:** Deep Slate background with a left "Cancel" button, a centered title "Create Inspection Case", and a right "Save" text action button.
@@ -156,7 +200,7 @@ Create a high-fidelity mobile UI mockup for the "Create Case Form" screen of the
 
 ---
 
-## 4. Case Detail Screen (`CaseDetailScreen.tsx`)
+## 5. Case Detail Screen (`CaseDetailScreen.tsx`)
 
 ### Structural Layout & Components
 - **Header:** Left back arrow, screen title displays the active Case Number.
@@ -207,7 +251,7 @@ Generate a mobile layout design for the "Case Detail Workspace" screen inside th
 
 ---
 
-## 5. Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
+## 6. Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
 
 ### Structural Layout & Components
 - **Camera Viewfinder:** Renders the active live camera preview in the center with a thin reticle grid overlay.
@@ -256,7 +300,7 @@ Generate a mobile UI screen mockup for the "Camera Evidence Collector" screen in
 
 ---
 
-## 6. Voice Notes Screen (`VoiceNotesScreen.tsx`)
+## 7. Voice Notes Screen (`VoiceNotesScreen.tsx`)
 
 ### Structural Layout & Components
 - **Waveform Area:** Horizontal line rendering audio waves during recording, styled in Steel Blue.
@@ -299,7 +343,7 @@ Create a high-fidelity mobile UI mockup for the "Voice Note Dictations" screen i
 
 ---
 
-## 7. Checklist Form Screen (`ChecklistFormScreen.tsx`)
+## 8. Checklist Form Screen (`ChecklistFormScreen.tsx`)
 
 ### Structural Layout & Components
 - **Top Header Progress Dock:**
@@ -339,11 +383,11 @@ Generate a mobile layout design for the "Checklist Form" screen of the SurveyAge
 
 ---
 
-## 8. Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
+## 9. Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
 
 ### Structural Layout & Components
 - **Export Config Card (Top):**
-  - Switches to toggle including photos, GPS watermarks, and checklist results.
+  - Toggles to include photos, GPS watermarks, and checklist results.
 - **Custom Summary Remarks Input:** A large multi-line textarea box to type final adjuster notes.
 - **Digital Sign-off Block:** Signature text input field.
 - **HTML Report Mock Frame:** A preview window showing the compiled document:
@@ -383,7 +427,7 @@ Generate a mobile mockup representing the "Report Export & Preview" workspace in
 
 ---
 
-## 9. Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
+## 10. Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
 
 ### Structural Layout & Components
 - **Main Canvas Workspace:** Displays the selected case image, centered and scaled.
@@ -416,8 +460,8 @@ Generate a mobile screen mockup for the "Photo Annotations Utility" canvas works
    - Row 1 (Drawing Tools): Interactive outline icons: "Brush", "Arrow" (active state with a Steel Blue highlight), "Circle", "Rectangle", "Text Block", and "Undo".
    - Row 2 (Color Selection): Four round color dots: Crimson Red (active checkmark), Warning Amber, Cyan Blue, and Forest Teal.
 3. Footer Controls:
-   - Left Side: "Discard Changes" button styled in gray.
-   - Right Side: A prominent button styled in solid Corporate Navy (#0A1D37) labeled "SAVE ANNOTATIONS".
+   - Discard Changes link styled in gray.
+   - A prominent button styled in solid Corporate Navy (#0A1D37) labeled "SAVE ANNOTATIONS".
 
 [VISUAL STYLE & AESTHETIC PRINCIPLES]
 - Tone: Professional image annotation utility, flat controls, clean drawing vector line rendering.

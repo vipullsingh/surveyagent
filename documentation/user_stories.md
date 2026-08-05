@@ -34,18 +34,50 @@ Secure portal for surveyors and loss adjusters to authenticate and access the ap
   - **Central Login Card:** Container styled in Navy-Slate (`#1E293B`) with a 1px solid border in Border Muted (`#334155`) and 16px rounded corners.
   - **Input States:** Active fields transition their border to Steel Blue (`#2A4365`) and show a blinking insertion cursor.
   - **Primary CTA:** Spans the card width, styled in solid Corporate Navy (`#0A1D37`) with text "AUTHENTICATE & LOG IN" in uppercase bold off-white.
-  - **Footer:** Display a line of small, secondary text in muted gray reading: "Protected under secure credentials check. Contact firm administrator for login assistance." (Removing references to multi-tenant checks).
+  - **Footer:** Display a line of small, secondary text in muted gray reading: "Protected under secure credentials check. Contact administrator for login assistance."
 
 ---
 
-## 2. Case List Dashboard Screen (`CaseListScreen.tsx`)
+## 2. Registration & Sign Up Screen (`SignUpScreen.tsx`)
+
+### Screen Overview
+Secure registration portal for new surveyors and loss adjusters to register accounts in the SurveyAgent system.
+
+### User Stories & Acceptance Criteria
+
+#### User Story 2.1: User Account Creation
+* **As a** New Field Surveyor,
+* **I want to** create a personal user account by specifying my name, email, and password,
+* **So that** I can register a profile, authenticate securely, and begin surveying.
+* **Acceptance Criteria:**
+  - **Inputs:** Displays text inputs for `Full Name`, `Email Address`, a secure `Password` input field with a togglable eye visibility button, and a secure `Confirm Password` field.
+  - **Validation Rules:**
+    * `Full Name` must not be empty.
+    * `Email Address` must check for valid syntax (RFC 5322).
+    * `Password` must be at least 6 characters.
+    * `Confirm Password` must match the `Password` field exactly.
+  - **Network Request:** Pressing "CREATE ACCOUNT & REGISTER" sends an HTTPS `POST /api/v1/auth/signup` containing fields.
+  - **Auto-Login on Success:** Upon successful registration (HTTP 201 Created), the backend returns a valid JWT session token. The app automatically saves the JWT token into `SecureStore` and navigates the surveyor directly to the Case List Dashboard.
+  - **Error Handling:** Renders a Crimson Red (`#991B1B`) banner at the top of the form if email registration conflicts occur (e.g. "Email already registered") or network errors arise.
+
+#### User Story 2.2: Sign In Redirect Navigation
+* **As a** Registered User,
+* **I want to** navigate from the Sign Up screen to the Sign In screen,
+* **So that** I don't have to re-enter registration steps if I already have an account.
+* **Acceptance Criteria:**
+  - **Navigation Link:** Footer displays a secondary link reading "Already have an account? Sign In".
+  - **Action:** Clicking "Sign In" navigates back to `LoginScreen.tsx`.
+
+---
+
+## 3. Case List Dashboard Screen (`CaseListScreen.tsx`)
 
 ### Screen Overview
 The main master dashboard displaying assigned cases, claim filters, connection states, and sync indicators.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 2.1: Hybrid Caching & Offline Reading
+#### User Story 3.1: Hybrid Caching & Offline Reading
 * **As a** Field Surveyor,
 * **I want to** view my assigned active cases while working in remote locations without internet reception,
 * **So that** I can access policy information and inspection scopes on-site.
@@ -56,7 +88,7 @@ The main master dashboard displaying assigned cases, claim filters, connection s
     * `OFFLINE`: Styled in Warning Amber (`#B45309`) background with a solid amber border.
   - **Local Cache Indicator:** Each case card displays a small green check/download icon if its full metadata and checklists are stored locally.
 
-#### User Story 2.2: Pull-to-Refresh & Sync
+#### User Story 3.2: Pull-to-Refresh & Sync
 * **As a** Field Surveyor,
 * **I want to** trigger a manual pull-to-refresh when a cellular network is available,
 * **So that** I can retrieve the latest case assignments and update the local SQLite database.
@@ -65,7 +97,7 @@ The main master dashboard displaying assigned cases, claim filters, connection s
   - **Cache Update:** Successfully returned payloads overwrite and update the local database.
   - **Visual Indicator:** Displays a standard native refresh indicator.
 
-#### User Story 2.3: Case Sorting, Search, & Filtering
+#### User Story 3.3: Case Sorting, Search, & Filtering
 * **As a** Field Surveyor,
 * **I want to** search and filter case cards by claim type or text matching,
 * **So that** I can quickly locate specific claim records out of a long list.
@@ -77,14 +109,14 @@ The main master dashboard displaying assigned cases, claim filters, connection s
 
 ---
 
-## 3. Create Case Screen (`CreateCaseScreen.tsx`)
+## 4. Create Case Screen (`CreateCaseScreen.tsx`)
 
 ### Screen Overview
 Form-based data-entry workspace to register a new inspection claim case locally on the device.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 3.1: Offline Case Registration & Draft Generation
+#### User Story 4.1: Offline Case Registration & Draft Generation
 * **As a** Field Surveyor,
 * **I want to** create a new case draft record by entering the client's information,
 * **So that** I can start collecting site photos and checklists immediately without needing an active internet connection.
@@ -94,7 +126,7 @@ Form-based data-entry workspace to register a new inspection claim case locally 
   - **Date Picker Constraint:** Prevents selecting future dates.
   - **Local Persistence:** Saving stores the draft case row to the local SQLite cache and navigates the surveyor directly to the Case Detail screen. If online, a duplicate `POST /api/v1/cases` syncs it to the server.
 
-#### User Story 3.2: Precise Geolocation Capture
+#### User Story 4.2: Precise Geolocation Capture
 * **As a** Field Surveyor,
 * **I want to** lock in my exact GPS coordinates on the form with a single button tap,
 * **So that** the location coordinates of the loss site are precisely verified.
@@ -106,14 +138,14 @@ Form-based data-entry workspace to register a new inspection claim case locally 
 
 ---
 
-## 4. Case Detail Screen (`CaseDetailScreen.tsx`)
+## 5. Case Detail Screen (`CaseDetailScreen.tsx`)
 
 ### Screen Overview
 The main hub for a single case, providing direct access to inspection sub-modules (Camera, Audio, Checklist) and triggering the cloud AI analysis uploader.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 4.1: Module Navigation Grid
+#### User Story 5.1: Module Navigation Grid
 * **As a** Field Surveyor,
 * **I want to** view a summary metadata card and a navigation grid showing the capture status of all sub-modules,
 * **So that** I can track what evidence remains to be collected for this case.
@@ -125,7 +157,7 @@ The main hub for a single case, providing direct access to inspection sub-module
     3. *Checklist Form:* Displays Completion Percentage (e.g. "Progress: 80% Completed").
     4. *Report Preview:* Navigates to the Report & Export view.
 
-#### User Story 4.2: On-Demand Batch Media Upload
+#### User Story 5.2: On-Demand Batch Media Upload
 * **As a** Field Surveyor,
 * **I want to** explicitly trigger a batch upload of all gathered photos, drawings, and voice notes at the end of the survey,
 * **So that** I can control cellular data consumption and verify files are sent to the cloud.
@@ -135,7 +167,7 @@ The main hub for a single case, providing direct access to inspection sub-module
   - **Multi-Part Upload:** App compiles all original photos (`.jpg`), annotated drawings (`_annotated.jpg`), and compressed dictations (`.m4a`) for the active case ID and POSTs them as a multipart payload to `/api/v1/cases/:id/upload-media`.
   - **Upload Progress Bar:** Displays a horizontal progress bar tracking actual upload bytes percentage.
 
-#### User Story 4.3: On-Demand Cloud AI Report Synthesis
+#### User Story 5.3: On-Demand Cloud AI Report Synthesis
 * **As a** Field Surveyor,
 * **I want to** select a specific cloud model and run automated analysis,
 * **So that** my voice dictations are transcribed, damage severity is rated, and report comments are draft-compiled.
@@ -151,14 +183,14 @@ The main hub for a single case, providing direct access to inspection sub-module
 
 ---
 
-## 5. Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
+## 6. Camera Evidence Screen (`CameraEvidenceScreen.tsx`)
 
 ### Screen Overview
 High-precision viewfinder interface to capture geotagged, wizard-guided, and quality-controlled photos.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 5.1: Legally Verifiable Watermark Flattening
+#### User Story 6.1: Legally Verifiable Watermark Flattening
 * **As a** Compliance Manager,
 * **I want** all captured case photos to bake in spatial and temporal metadata,
 * **So that** evidence cannot be forged or altered.
@@ -166,7 +198,7 @@ High-precision viewfinder interface to capture geotagged, wizard-guided, and qua
   - **Watermark Text:** Applies a monospaced, high-contrast text overlay to the bottom of the camera image frame containing: Case ID, ISO Timestamp, Latitude/Longitude coordinates, Altitude, and Active Angle Label.
   - **Flattened Output:** The text watermark is hard-coded into the pixel buffer of the final exported JPEG, not just rendered as an overlay in the UI.
 
-#### User Story 5.2: Wizard-Guided Angle Checklist
+#### User Story 6.2: Wizard-Guided Angle Checklist
 * **As a** Field Surveyor,
 * **I want to** see a list of mandatory photo angles required for the current claim type,
 * **So that** I collect all the necessary photographic evidence before leaving the site.
@@ -176,7 +208,7 @@ High-precision viewfinder interface to capture geotagged, wizard-guided, and qua
     * *Fire:* `POINT OF ORIGIN`, `FUSE BOX`, `STRUCTURAL EXT`, `INTERIOR ROOMS`.
   - **Visual States:** Checks (`✓`) on captured tags, amber bullet (`•`) on the current target angle prompt, and gray outline on outstanding tags.
 
-#### User Story 5.3: Automated On-Device Exposure & Blur Checks
+#### User Story 6.3: Automated On-Device Exposure & Blur Checks
 * **As a** Field Surveyor,
 * **I want the camera interface to** run a real-time sanity check on the image buffer,
 * **So that** I am alerted immediately if a photo is blurry, dark, or overexposed.
@@ -193,14 +225,14 @@ High-precision viewfinder interface to capture geotagged, wizard-guided, and qua
 
 ---
 
-## 6. Voice Notes Screen (`VoiceNotesScreen.tsx`)
+## 7. Voice Notes Screen (`VoiceNotesScreen.tsx`)
 
 ### Screen Overview
 Voice recording screen to dictate inspection comments, featuring waveform visual feedback and local playbacks.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 6.1: High-Fidelity Waveform Dictation
+#### User Story 7.1: High-Fidelity Waveform Dictation
 * **As a** Field Surveyor,
 * **I want to** record verbal loss details using a visual wave monitor,
 * **So that** I know the microphone is active and capturing my commentary.
@@ -210,7 +242,7 @@ Voice recording screen to dictate inspection comments, featuring waveform visual
   - **Timer:** Displays elapsed duration as digital monospaced font `HH:MM:SS.hh`.
   - **File Saving:** Closes file stream and saves note as compressed `.m4a` file in `/cases/{id}/audio/{noteId}.m4a` on click.
 
-#### User Story 6.2: Offline Audio Log Management
+#### User Story 7.2: Offline Audio Log Management
 * **As a** Field Surveyor,
 * **I want to** access a list of local recordings and play them back,
 * **So that** I can review my dictations before uploading them for AI transcription.
@@ -220,14 +252,14 @@ Voice recording screen to dictate inspection comments, featuring waveform visual
 
 ---
 
-## 7. Checklist Form Screen (`ChecklistFormScreen.tsx`)
+## 8. Checklist Form Screen (`ChecklistFormScreen.tsx`)
 
 ### Screen Overview
 A structured form panel with input fields tailored dynamically to case claim domains, supporting offline auto-saving.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 7.1: Dynamic Claim-Type Forms
+#### User Story 8.1: Dynamic Claim-Type Forms
 * **As a** Field Surveyor,
 * **I want** the checklist page to load specific form layouts tailored for the active claim type,
 * **So that** I am not presented with irrelevant questions.
@@ -235,7 +267,7 @@ A structured form panel with input fields tailored dynamically to case claim dom
   - **Dynamic Loading:** Loads questionnaire configurations matching the case's claim type (e.g. Motor vehicle collision checklist vs Marine cargo inspection questions).
   - **Field Support:** Renders Text, Textarea, custom segmented Radio buttons, Date inputs, and Checkboxes.
 
-#### User Story 7.2: Conditional Form Logic & Auto-Save
+#### User Story 8.2: Conditional Form Logic & Auto-Save
 * **As a** Field Surveyor,
 * **I want** the checklist inputs to expand conditionally and auto-save on change,
 * **So that** I do not lose progress if my device shuts down or the app closes.
@@ -246,14 +278,14 @@ A structured form panel with input fields tailored dynamically to case claim dom
 
 ---
 
-## 8. Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
+## 9. Report Preview & Export Screen (`ReportPreviewScreen.tsx`)
 
 ### Screen Overview
 Document compile screen to review layout settings, edit final remarks, and export the official PDF.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 8.1: Report Compilation Config & Sign-off
+#### User Story 9.1: Report Compilation Config & Sign-off
 * **As a** Field Surveyor,
 * **I want to** toggle layout segments, input final remarks, and sign off digitally,
 * **So that** I can curate what data and evidence are compiled into the official document.
@@ -263,7 +295,7 @@ Document compile screen to review layout settings, edit final remarks, and expor
   - **Digital Sign-off Field:** Text input for inspector's signature name.
   - **Styled Document Webview:** Displays a high-contrast white document preview sheet matching the formal report layout template (letterhead, meta columns, photo grids, and signatures).
 
-#### User Story 8.2: Server-Side PDF Compilation
+#### User Story 9.2: Server-Side PDF Compilation
 * **As a** Field Surveyor,
 * **I want to** trigger a server-side PDF render and download the file,
 * **So that** I can share or email the document directly to the client before leaving the site.
@@ -274,14 +306,14 @@ Document compile screen to review layout settings, edit final remarks, and expor
 
 ---
 
-## 9. Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
+## 10. Photo Annotation Screen (`PhotoAnnotationScreen.tsx`)
 
 ### Screen Overview
 Interactive canvas editor to draw overlay markings (arrows, shapes, text labels) directly on captured evidence photos.
 
 ### User Stories & Acceptance Criteria
 
-#### User Story 9.1: Vector Annotation Overlay
+#### User Story 10.1: Vector Annotation Overlay
 * **As a** Field Surveyor,
 * **I want to** draw circles, arrows, and write labels on a canvas over my captured photos,
 * **So that** I can clearly point out scratches, cracks, or dent sizes in the final PDF.
@@ -291,7 +323,7 @@ Interactive canvas editor to draw overlay markings (arrows, shapes, text labels)
   - **Color Picker Swatches:** Solid color dots for Crimson Red (active default), Warning Amber, Cyan Blue, and Forest Teal.
   - **Canvas Response:** Captures touch drag gestures to render smooth vector lines and text overlays on top of the image container.
 
-#### User Story 9.2: Double-Faceted Saving (Vector Cache & Flat JPEG)
+#### User Story 10.2: Double-Faceted Saving (Vector Cache & Flat JPEG)
 * **As a** Field Surveyor,
 * **I want to** save a flattened version of the annotated image for report printing while keeping the original vector layers editable,
 * **So that** I can modify drawings later if needed.

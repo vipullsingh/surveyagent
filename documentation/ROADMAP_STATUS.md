@@ -11,7 +11,7 @@
 | Development Phase | Status | Completion % | Key Milestones Completed |
 | :--- | :---: | :---: | :--- |
 | **Phase 1: Backend Foundation & DB Schema Setup** | ⏳ UPCOMING | **0%** | Setup Go REST API framework, GORM database models, and PostgreSQL migrations. |
-| **Phase 2: Mobile UI Setup & Caching** | ⏳ UPCOMING | **0%** | Setup Expo SDK navigation & pages UI, integrate local AsyncStorage/SQLite cache. |
+| **Phase 2: Mobile UI Setup & Caching** | ⏳ UPCOMING | **0%** | Setup Expo SDK navigation & pages UI (Login, Sign Up, Case List, Case Detail), integrate local AsyncStorage/SQLite cache. |
 | **Phase 3: Camera Evidence & Media Saving** | ⏳ UPCOMING | **0%** | Geotagged camera layout, quality thresholds, and local filesystem directories. |
 | **Phase 4: Voice Notes & Checklists** | ⏳ UPCOMING | **0%** | Audio recording controller, claim-type forms, and local checklist caches. |
 | **Phase 5: Batch Upload, Cloud AI & PDF Compilation** | ⏳ UPCOMING | **0%** | Multi-part upload handler, backend AI integrations (Gemini/OpenAI), and HTML-to-PDF server-side engine. |
@@ -22,7 +22,7 @@
 
 - **Requirement Specifications and Plan**:
   - Pivoted architecture away from client-side Realm DB synchronizations and native `llama.rn`/`whisper.rn` runtimes.
-  - Finalized details for all 9 screens, including structured prompts for visual design generation.
+  - Finalized details for all 10 screens, including structured prompts for visual design generation.
   - Outlined target GORM schemas (User, Case, Media, Checklist) and authentication matrices.
 
 ---
@@ -39,8 +39,8 @@ The following technical tasks are remaining to reach 100% Production Readiness:
 
 ### 2. React Native UI Screens & Local Cache
 - Scaffold the Expo mobile project.
-- Implement navigation routes connecting all 9 screens.
-- Build visual screens for Login, Case List, and Case Detail matching the UI prompts.
+- Implement navigation routes connecting all 10 screens.
+- Build visual screens for Login, Sign Up, Case List, and Case Detail matching the UI prompts.
 - Implement read-only caching for Case lists using SQLite or AsyncStorage.
 
 ### 3. Geotagged Camera & Voice Notes Storage
@@ -78,6 +78,38 @@ The following technical tasks are remaining to reach 100% Production Readiness:
   4. Upload and AI Gateway Integration
      └── Create multipart controllers and backend cloud API connections.
 ```
+
+---
+
+## 5. Comprehensive Task Breakdown Checklist
+
+### Phase 1: Core System Setup
+- [ ] Initialize Golang module `surveyagent-backend` with Gin, JWT, and bcrypt.
+- [ ] Create domain models (`User`, `Case`, `Media`, `VoiceNote`, `Checklist`).
+- [ ] Setup GORM database migration scripts targeting PostgreSQL.
+- [ ] Implement JWT authentication middleware.
+
+### Phase 2: Mobile UI & Caching
+- [ ] Build `LoginScreen.tsx` with email and password fields.
+- [ ] Build `SignUpScreen.tsx` with full name, email, password, and confirm password fields.
+- [ ] Build `CaseListScreen.tsx` with search, filters, and local caching read-back.
+- [ ] Build `CaseDetailScreen.tsx` displaying case details and module navigation tiles.
+- [ ] Build `CreateCaseScreen.tsx` capturing metadata and Auto-GPS coordinate acquisition.
+
+### Phase 3: Evidence Capture & Media
+- [ ] Build `CameraEvidenceScreen.tsx` with simulated view, GPS watermark, and quality analysis.
+- [ ] Create local directory paths for saving original/annotated photos and thumbnails.
+- [ ] Build `PhotoAnnotationScreen.tsx` with drawing canvas overlay (arrow, circle, text).
+
+### Phase 4: Voice Notes & Checklist Form
+- [ ] Build `VoiceNotesScreen.tsx` saving audio files to local directories.
+- [ ] Implement dynamic checklist form engine in `ChecklistFormScreen.tsx`.
+
+### Phase 5: Upload, AI Integration & PDF
+- [ ] Create batch upload client script in React Native.
+- [ ] Setup backend integrations for Gemini API and OpenAI APIs.
+- [ ] Build backend PDF generator rendering structured reports with embedded base64 photos.
+- [ ] Build `ReportPreviewScreen.tsx` displaying toggles, custom remarks editor, and triggers.
 
 ---
 
